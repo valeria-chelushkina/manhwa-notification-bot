@@ -1,0 +1,60 @@
+import { getNotificationsList } from "./parser.js";
+import fs from "fs";
+import { fileURLToPath } from "url";
+import { sendNewChapter } from "./telegram.js";
+
+const storagePath = fileURLToPath(
+  new URL("../storage/storageHistory.json", import.meta.url),
+);
+
+async function checkChapters(bot, chatId) {
+  let notificationsList = await getNotificationsList();
+
+  if (!notificationsList || notificationsList.length === 0) return; // no new chapters were released
+
+  let lastUpdate = notificationsList[0]; // the last released chapter would be first in the array
+
+  let lastSeenId = "";
+  if (fs.existsSync(storagePath)) {
+    try {
+      const rawData = fs.readFileSync(storagePath, "utf8");
+      if (rawData) lastSeenId = JSON.parse(rawData).lastSeenId;
+      console.log(lastSeenId);
+    } catch (err) {
+      console.error("What happened?", err);
+    }
+  }
+
+  // if the newest ID matches history, drop execution early
+  if (lastUpdate.id === lastSeenId) {
+    console.log("No changes.");
+    return;
+  }
+
+  // find all items that are newer than checkpoint
+  const newItems = [];
+  for (const item of notificationsList) {
+    if (item.id === lastSeenId) break;
+    newItems.push(item);
+  }
+
+  // send out chapters
+  newItems.reverse();
+  for (const item of newItems) {
+    await sendNewChapter(bot, chatId, item);
+  }
+
+  // save the fresh checkpoint tracking data
+  fs.writeFileSync(
+    storagePath,
+    JSON.stringify({ lastSeenId: lastUpdate.id }, null, 2),
+  );
+
+  return;
+}
+
+export function setSchedule(bot, chatId) {
+  console.log("Starting schedule...");
+  checkChapters(bot, chatId);
+  setInterval(() => checkChapters(bot, chatId), 10 * 60 * 1000);
+}
