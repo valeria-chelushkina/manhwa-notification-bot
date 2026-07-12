@@ -1,8 +1,12 @@
 import axios from "axios";
 import path from "path";
 import fs, { readFileSync } from "fs";
+import { fileURLToPath } from "url";
 
-const cookiesPath = path.resolve("src", "storage", "cookies.json");
+// const cookiesPath = path.resolve("src", "storage", "cookies.json");
+
+// resolves relative directory problem
+const cookiesPath = fileURLToPath(new URL("../storage/cookies.json", import.meta.url));
 
 function loadCookiesFromStorage() {
   try {

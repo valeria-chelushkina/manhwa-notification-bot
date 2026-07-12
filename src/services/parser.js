@@ -4,7 +4,7 @@ export async function getNotificationsList() {
 
   try {
     const rawData = await apiClient.get(
-      "https://comix.to/api/v1/user/notifications?scope=comics&unread=1&page=1&limit=5",
+      "https://comix.to/api/v1/user/notifications?scope=comics&unread=1",
     );
     const rawList = rawData.data.result?.items || [];
 
@@ -36,5 +36,3 @@ export async function getNotificationsList() {
     return [];
   }
 }
-
-console.log(await getNotificationsList());
