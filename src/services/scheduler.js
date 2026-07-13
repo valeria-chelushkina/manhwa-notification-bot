@@ -56,5 +56,10 @@ async function checkChapters(bot, chatId) {
 export function setSchedule(bot, chatId) {
   console.log("Starting schedule...");
   checkChapters(bot, chatId);
-  setInterval(() => checkChapters(bot, chatId), 10 * 60 * 1000);
+  return setInterval(() => checkChapters(bot, chatId), 10 * 60 * 1000);
+}
+
+export function stopSchedule(intervalId)
+{
+  clearInterval(intervalId);
 }

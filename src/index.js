@@ -9,20 +9,18 @@ if (!process.env.BOT_TOKEN) {
 }
 
 const botToken = process.env.BOT_TOKEN;
+const myChatId = process.env.MY_CHAT_ID;
 
 const bot = new Telegraf(botToken);
 
-startupBot(bot);
+startupBot(bot, myChatId);
 
 try {
-  bot.launch();
+  bot.launch({ dropPendingUpdates: true });
   console.log("Bot has launched");
 } catch (err) {
   console.error("Something went wrong!");
 }
-
-const myChatId = process.env.MY_CHAT_ID;
-setSchedule(bot, myChatId);
 
 // Enable graceful stop
 process.once("SIGINT", () => bot.stop("SIGINT"));

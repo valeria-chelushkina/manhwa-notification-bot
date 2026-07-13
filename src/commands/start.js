@@ -1,37 +1,13 @@
-import { getNotificationsList } from "../services/parser.js";
-import { cleanHtml } from "../utils/helpers.js";
-import "dotenv/config";
+import { startMessage } from "./messages/startMessage.js";
+import { setScheduleMessage } from "./messages/scheduleMessage.js";
+import { unreadListMessage } from "./messages/unreadListMessage.js";
 
-export function startupBot(bot) {
-  bot.start(async (ctx) => {
-    try {
-      const unreadList = await getNotificationsList();
-      let notificationContent = "";
+export function startupBot(bot, chatId) {
+  
+  bot.start(async (ctx) => {await startMessage(ctx)});
 
-      if (!Array.isArray(unreadList) || unreadList.length === 0) {
-        notificationContent = `There are no new notifications on your account!`;
-      } else {
-        const formattedList = unreadList.map((item, i) => {
-          const cleanedItem = Object.assign({}, item, cleanHtml(item));
-          return `<a href='${cleanedItem.url}'>${i + 1}. ${cleanedItem.title} - Chapter ${cleanedItem.chapter}.</a>`;
-        });
+  bot.hears('Start schedule✅', async (ctx) => await setScheduleMessage(ctx, bot, chatId));
 
-        notificationContent = `Here is the list of new notifications on your account:
-${formattedList.join("\n")}`;
-      }
+  bot.hears('Unread notifications🔔', async (ctx) => await unreadListMessage(ctx));
 
-      const formattedMessage = `Welcome to the manhwa notifications sender bot.
-It will send you notifications when new chapters of your manhwas come out.
-
-
-${notificationContent}`;
-
-      await ctx.reply(formattedMessage, { parse_mode: "HTML" });
-    } catch (error) {
-      console.error("Error in bot start command:", error);
-      await ctx.reply(
-        "Sorry, something went wrong while fetching your notifications.",
-      );
-    }
-  });
 }

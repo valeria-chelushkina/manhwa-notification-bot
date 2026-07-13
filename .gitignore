@@ -144,4 +144,4 @@ vite.config.ts.timestamp-*
 
 # Secret files
 src/storage/cookies.json
-src/storage/state.json
+src/storage/storageHistory.json
