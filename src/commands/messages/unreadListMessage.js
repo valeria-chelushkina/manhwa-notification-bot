@@ -19,8 +19,8 @@ Go and read anything else :)`;
 ${formattedList.join("\n")}`;
     }
 
-    return ctx.reply(notificationContent, { parse_mode: "HTML" });
     console.log("Bot sent out an unread list.");
+    return ctx.reply(notificationContent, { parse_mode: "HTML" });
   } catch (error) {
     console.error("Error in bot unread list command:", error);
     return ctx.reply(

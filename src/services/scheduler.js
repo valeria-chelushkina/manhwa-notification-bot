@@ -7,6 +7,8 @@ const storagePath = fileURLToPath(
   new URL("../storage/storageHistory.json", import.meta.url),
 );
 
+let scheduleInterval = null;
+
 async function checkChapters(bot, chatId) {
   let notificationsList = await getNotificationsList();
 
@@ -19,7 +21,6 @@ async function checkChapters(bot, chatId) {
     try {
       const rawData = fs.readFileSync(storagePath, "utf8");
       if (rawData) lastSeenId = JSON.parse(rawData).lastSeenId;
-      console.log(lastSeenId);
     } catch (err) {
       console.error("What happened?", err);
     }
@@ -53,13 +54,25 @@ async function checkChapters(bot, chatId) {
   return;
 }
 
-export function setSchedule(bot, chatId) {
+export function setSchedule(bot, chatId, stop = false) {
+  if (scheduleInterval) {
+    clearInterval(scheduleInterval);
+  }
+
   console.log("Starting schedule...");
-  checkChapters(bot, chatId);
-  return setInterval(() => checkChapters(bot, chatId), 10 * 60 * 1000);
+  if (!stop) checkChapters(bot, chatId);
+  scheduleInterval = setInterval(
+    () => checkChapters(bot, chatId),
+    10 * 60 * 1000,
+  );
 }
 
-export function stopSchedule(intervalId)
-{
-  clearInterval(intervalId);
+export function stopSchedule() {
+  if (scheduleInterval) {
+    clearInterval(scheduleInterval);
+    scheduleInterval = null;
+    console.log("Interval cleared successfully.");
+  } else {
+    console.log("No active interval to stop.");
+  }
 }

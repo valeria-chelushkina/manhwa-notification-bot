@@ -4,9 +4,6 @@
   "type": "module",
   "description": "Telegram bot that will (might) send you notifications when new chapters of your following man(hw\\g\\hu)as come out.",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/valeria-chelushkina/manhwa-notification-bot.git"
