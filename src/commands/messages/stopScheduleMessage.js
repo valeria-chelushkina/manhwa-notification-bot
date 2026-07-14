@@ -1,8 +1,9 @@
 import { stopSchedule } from "../../services/scheduler.js";
-import { Keyboard } from "../keyboard.js";
+import { Keyboard } from "../../ui/keyboard.js";
 
 export async function stopScheduleMessage(ctx) {
   try {
+    await ctx.answerCbQuery();
     stopSchedule();
     console.log("Schedule has been stopped.");
     return ctx.reply(

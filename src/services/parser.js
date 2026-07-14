@@ -39,10 +39,18 @@ export async function getNotificationsList() {
 
 export async function getReadingList() {
   try {
-    const rawData = await apiClient.get(
-      "https://comix.to/api/v1/user/following-titles?folder_id=1&sort=chapter_updated_desc",
-    );
-    const rawList = rawData.data.result?.items || [];
+
+    let pageNumber = 1;
+    let rawList = [];
+    while(true)
+    {
+      const url = 'https://comix.to/api/v1/user/following-titles?folder_id=1&sort=chapter_updated_desc&page=' + pageNumber;
+      const rawData = await apiClient.get(url);
+      const hasNext = rawData.data.result?.meta.hasNext || false;
+      rawList.push(...(rawData.data.result?.items || []));
+      pageNumber++;
+      if(!hasNext) break;
+    }
 
     if (!Array.isArray(rawList)) return [];
 

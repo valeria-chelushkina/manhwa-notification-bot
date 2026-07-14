@@ -15,7 +15,7 @@ export function cleanHtml(data) {
   const safeChapter = escapeHtml(data.chapter.toString());
 
   return {
-    title: data.title,
+    //title: data.title,
     url: safeUrl,
     chapter: safeChapter,
   };

@@ -1,4 +1,4 @@
-import { Keyboard } from "../keyboard.js";
+import { Keyboard } from "../../ui/keyboard.js";
 
 export async function startMessage(ctx) {
   try {

@@ -1,7 +1,10 @@
-import { Keyboard } from "../keyboard.js";
+import { Keyboard } from "../../ui/keyboard.js";
 
 // will possibly make it a scene in the future
 export async function setupNotificaitonsMessage(ctx, isActive) {
+   if (ctx.callbackQuery) {
+        await ctx.answerCbQuery();
+    } 
   let firstOption = "";
   let keyboardOption;
   if (!isActive) {
@@ -19,7 +22,7 @@ ${firstOption}
 
   try {
     console.log("Sent out 'setup notifications' message.");
-    return ctx.reply(finalMessage, { parse_mode: "HTML", ...keyboardOption });
+    return ctx.reply(finalMessage, { parse_mode: "HTML", ...keyboardOption, });
   } catch (err) {
     console.error("Couldn't send out a setup message:", err);
     return ctx.reply(
