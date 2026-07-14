@@ -32,7 +32,32 @@ export async function getNotificationsList() {
       };
     });
   } catch (err) {
-    console.error("Couldn't retrieve the data: ", err);
+    console.error("Couldn't retrieve notifications data: ", err);
+    return [];
+  }
+}
+
+export async function getReadingList() {
+  try {
+    const rawData = await apiClient.get(
+      "https://comix.to/api/v1/user/following-titles?folder_id=1&sort=chapter_updated_desc",
+    );
+    const rawList = rawData.data.result?.items || [];
+
+    if (!Array.isArray(rawList)) return [];
+
+    return rawList.map((item) => {
+      // Get rid of HTML tags in the title
+      const cleanTitle = item.title.replace(/<\/?[^>]+(>|$)/g, "");
+
+      return {
+        id: item.id.toString(),
+        title: cleanTitle,
+        url: item.url,
+      };
+    });
+  } catch (err) {
+    console.error("Couldn't retrieve reading list data: ", err);
     return [];
   }
 }

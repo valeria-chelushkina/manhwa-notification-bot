@@ -6,8 +6,8 @@ export async function stopScheduleMessage(ctx) {
     stopSchedule();
     console.log("Schedule has been stopped.");
     return ctx.reply(
-      "Schedule has been successfully stopped⛔️\nYou will not be getting any more notifications untill you start it up again.",
-      { parse_mode: "HTML", ...Keyboard.startMenu() },
+      "Schedule has been successfully stopped⛔️\nYou will not be getting any more notifications until you start it up again.",
+      { parse_mode: "HTML", },
     );
   } catch (err) {
     console.error("Error while stopping a schedule: ", err);

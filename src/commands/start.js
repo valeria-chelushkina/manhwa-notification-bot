@@ -2,23 +2,26 @@ import { startMessage } from "./messages/startMessage.js";
 import { setScheduleMessage } from "./messages/scheduleMessage.js";
 import { unreadListMessage } from "./messages/unreadListMessage.js";
 import { stopScheduleMessage } from "./messages/stopScheduleMessage.js";
+import { setupNotificaitonsMessage } from "./messages/setupNotifMessage.js";
 import { Keyboard } from "./keyboard.js";
 
 export function startupBot(bot, chatId) {
+  let isActive = false;
 
-  bot.telegram.sendMessage(
-    chatId, 
-    "🤖Bot has rebooted. Menu refreshed.", 
-    { ...Keyboard.startMenu() }
-  ).catch(err => console.error("Could not reset menu on startup:", err));
+  bot.telegram
+    .sendMessage(chatId, "🤖Bot has rebooted. Menu refreshed.", {
+      ...Keyboard.mainMenu(),
+    })
+    .catch((err) => console.error("Could not reset menu on startup:", err));
 
   bot.start(async (ctx) => {
+    isActive = false;
     await startMessage(ctx);
   });
 
   bot.hears(
-    "Start schedule✅",
-    async (ctx) => await setScheduleMessage(ctx, bot, chatId),
+    "Set up notifications⚙️",
+    async (ctx) => await setupNotificaitonsMessage(ctx, isActive),
   );
 
   bot.hears(
@@ -26,8 +29,13 @@ export function startupBot(bot, chatId) {
     async (ctx) => await unreadListMessage(ctx),
   );
 
-  bot.hears(
-    'Stop schedule❌',
-    async (ctx) => await stopScheduleMessage(ctx),
-  )
+  bot.action("start-schedule", async (ctx) => {
+    isActive = true;
+    await setScheduleMessage(ctx, bot, chatId);
+  });
+
+  bot.action("stop-schedule", async (ctx) => {
+    isActive = false;
+    await stopScheduleMessage(ctx);
+  });
 }

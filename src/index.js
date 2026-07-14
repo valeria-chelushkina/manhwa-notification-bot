@@ -1,7 +1,5 @@
 import "dotenv/config";
 import { Telegraf } from "telegraf";
-import { configDotenv } from "dotenv";
-import { setSchedule } from "./services/scheduler.js";
 import { startupBot } from "./commands/start.js";
 
 if (!process.env.BOT_TOKEN) {

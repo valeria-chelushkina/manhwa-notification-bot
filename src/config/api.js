@@ -27,7 +27,7 @@ function loadCookiesFromStorage() {
   }
 }
 
-const apiClient = await axios.create({
+const apiClient = axios.create({
   baseURL: "https://comix.to",
   headers: {
     Cookie: loadCookiesFromStorage(),

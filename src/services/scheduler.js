@@ -60,7 +60,7 @@ export function setSchedule(bot, chatId, stop = false) {
   }
 
   console.log("Starting schedule...");
-  if (!stop) checkChapters(bot, chatId);
+  if (!scheduleInterval) checkChapters(bot, chatId);
   scheduleInterval = setInterval(
     () => checkChapters(bot, chatId),
     10 * 60 * 1000,
