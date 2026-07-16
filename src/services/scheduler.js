@@ -1,7 +1,7 @@
 import { getNotificationsList } from "./parser.js";
-import fs from "fs";
-import { fileURLToPath } from "url";
 import { sendNewChapter } from "./telegram.js";
+import { fileURLToPath } from "url";
+import fs from 'fs';
 
 const storagePath = fileURLToPath(
   new URL("../storage/storageHistory.json", import.meta.url),

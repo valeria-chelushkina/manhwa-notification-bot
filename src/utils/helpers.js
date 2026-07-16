@@ -20,3 +20,9 @@ export function cleanHtml(data) {
     chapter: safeChapter,
   };
 }
+
+export function compareTitles(readingList, titleName)
+{
+  const checkTitle = obj => obj.title.trim().toLowerCase() === titleName.trim().toLowerCase();
+  return readingList.some(checkTitle);
+}

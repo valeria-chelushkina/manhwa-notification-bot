@@ -1,6 +1,6 @@
 import axios from "axios";
-import fs, { readFileSync } from "fs";
 import { fileURLToPath } from "url";
+import fs from 'fs';
 
 // resolves relative directory problem
 const cookiesPath = fileURLToPath(

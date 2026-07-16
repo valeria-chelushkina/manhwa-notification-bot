@@ -1,8 +1,10 @@
 import { Telegraf } from "telegraf";
 import { startupBot } from "./commands/registerHandlers.js";
-import dotenv from "dotenv";
+import { setupScenes } from "./scenes/setupScenes.js";
 import { fileURLToPath } from "url";
 import path from "path";
+import dotenv from "dotenv";
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
@@ -15,7 +17,9 @@ const myChatId = process.env.MY_CHAT_ID;
 
 const bot = new Telegraf(botToken);
 
+setupScenes(bot);
 startupBot(bot, myChatId);
+
 
 try {
   bot.launch({ dropPendingUpdates: true });

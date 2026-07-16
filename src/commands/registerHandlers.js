@@ -41,9 +41,12 @@ export function startupBot(bot, chatId) {
     await stopScheduleMessage(ctx);
   });
 
-  bot.action('disable-title-notif', async (ctx) => {
+  bot.action("disable-title-notif", async (ctx) => {
     await disableTitleMessage(ctx);
-  })
+  });
 
-  bot.action('mute-title', async(ctx) => await muteTitleMessage(ctx));
+  bot.action("mute-title", async (ctx) => {
+    await muteTitleMessage(ctx);
+    await ctx.scene.enter("MUTE_TITLE_SCENE");
+  });
 }
