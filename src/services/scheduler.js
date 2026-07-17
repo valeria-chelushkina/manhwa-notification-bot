@@ -7,6 +7,10 @@ const storagePath = fileURLToPath(
   new URL("../storage/storageHistory.json", import.meta.url),
 );
 
+const mutedPath = fileURLToPath(
+  new URL("../storage/mutedList.json", import.meta.url),
+);
+
 let scheduleInterval = null;
 
 async function checkChapters(bot, chatId) {
@@ -28,9 +32,13 @@ async function checkChapters(bot, chatId) {
     return;
   }
 
+  const lookupSet = new Set(readJsonFile(mutedPath, []));
+
   // find all items that are newer than checkpoint
   const newItems = [];
   for (const item of notificationsList) {
+    // skip muted titles
+    if (lookupSet.has(item.title)) continue;
     if (item.id === lastSeenId) break;
     newItems.push(item);
   }
