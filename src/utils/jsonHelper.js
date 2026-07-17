@@ -1,31 +1,27 @@
-import fs from "fs";
+import fs from 'fs';
 
-export function readJsonFile(filePath) {
-  if (fs.existsSync(filePath)) {
-    try {
-      const rawData = fs.readFileSync(filePath, "utf8");
-      if (rawData) {
-        return JSON.parse(rawData);
-      }
-    } catch (err) {
-      console.log(`Couldn't open a file with path ${filePath}: ${err}`);
-      return [];
+export function readJsonFile(filePath, defaultData = null) {
+  try {
+    if (!fs.existsSync(filePath)) {
+      return defaultData;
     }
+    const rawData = fs.readFileSync(filePath, "utf8");
+    if (!rawData) {
+      return defaultData;
+    }
+    return JSON.parse(rawData);
+  } catch (err) {
+    console.error(`Error reading JSON file at ${filePath}:`, err);
+    return defaultData;
   }
-  return [];
 }
 
 export function writeJsonFile(filePath, data) {
-  if (fs.existsSync(filePath)) {
-    try {
-      fs.writeFileSync(filePath, data);
-      return true;
-    } catch (err) {
-      console.log(
-        `Couldn't write ${data} data into a file with path ${filePath}: ${err}`,
-      );
-      return false;
-    }
+  try {
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    return true;
+  } catch (err) {
+    console.error(`Error writing JSON file at ${filePath}:`, err);
+    return false;
   }
-  return false;
 }

@@ -11,15 +11,13 @@ export async function muteTitleMessage(ctx) {
   try {
     await ctx.answerCbQuery();
     const readingList = await getReadingList();
-    let mutedList = [];
+    let mutedList = readJsonFile(mutedPath, []);
 
     if (!Array.isArray(readingList) || readingList.length === 0) {
       return ctx.reply(
         "Your reading list is empty. You have no titles to get notifications from.",
       );
     }
-
-    mutedList = readJsonFile(mutedPath);
 
     const lookupSet = new Set(mutedList);
 

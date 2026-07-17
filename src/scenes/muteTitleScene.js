@@ -13,10 +13,12 @@ const mutedPath = fileURLToPath(
 const inlineHandler = new Composer();
 inlineHandler.action("continue", async (ctx) => {
   await ctx.answerCbQuery();
+  await ctx.deleteMessage();
   return ctx.scene.reenter();
 });
 inlineHandler.action("stop", async (ctx) => {
   await ctx.answerCbQuery();
+  await ctx.deleteMessage();
   ctx.reply("Returning to the main menu...");
   return ctx.scene.leave();
 });
@@ -48,10 +50,20 @@ export const muteTitleScene = new Scenes.WizardScene(
       }
 
       // checks if title is already muted
-      if (checkIfMuted(mutedPath, titleName)) return;
+      let listData = readJsonFile(mutedPath, []);
+
+      if (compareTitles(listData, titleName)) {
+        await ctx.reply("This title is already muted. Do you want to choose another title to mute?", {
+          ...Markup.inlineKeyboard([
+            Markup.button.callback("Yes✅", "continue"),
+            Markup.button.callback("No❌", "stop"),
+          ]),
+        });
+        return ctx.wizard.next();
+      }
 
       // write the file into the mutedList (will be a DB later)
-      if (!addToMuteList(mutedPath, titleName)) {
+      if (!appendToJson(mutedPath, titleName)) {
         ctx.reply(
           "Something went wrong and couldn't add your title in the muted list. Leaving the scene...",
         );
@@ -79,20 +91,19 @@ export const muteTitleScene = new Scenes.WizardScene(
   inlineHandler,
 );
 
-function addToMuteList(filePath, data) {
-  let readData = readJsonFile(filePath);
-  readData.push(data);
-  return writeJsonFile(
-    filePath,
-    JSON.stringify(readData.map((item) => item.trim().toLowerCase())),
-  );
-}
+function appendToJson(filePath, data) {
+  let newData = readJsonFile(filePath, []);
 
-function checkIfMuted(filePath, titleName) {
-  const readingList = readJsonFile(filePath);
-  if (compareTitles(readingList, titleName)) {
-    ctx.reply("This title is already muted. Try to choose another one.");
+  newData.push(data);
+  const trimmedData = newData.map((item) => {
+    return item.trim().toLowerCase();
+  });
+  
+  if (writeJsonFile(filePath, trimmedData)) {
+    console.log("Title successfully added to a muted list file!");
     return true;
+  } else {
+    console.error("Something went wrong writing to file.");
+    return false;
   }
-  return false;
 }

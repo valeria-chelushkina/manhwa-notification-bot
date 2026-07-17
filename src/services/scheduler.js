@@ -17,8 +17,10 @@ async function checkChapters(bot, chatId) {
   let lastUpdate = notificationsList[0]; // the last released chapter would be first in the array
 
   let lastSeenId = "";
-
-  lastSeenId = readJsonFile(storagePath)?.lastSeenId;
+  const storedData = readJsonFile(storagePath, null);
+  if (storedData && storedData.lastSeenId) {
+    lastSeenId = storedData.lastSeenId;
+  }
 
   // if the newest ID matches history, drop execution early
   if (lastUpdate.id === lastSeenId) {
@@ -40,10 +42,7 @@ async function checkChapters(bot, chatId) {
   }
 
   // save the fresh checkpoint tracking data
-  writeJsonFile(
-    storagePath,
-    JSON.stringify({ lastSeenId: lastUpdate.id }, null, 2),
-  );
+  writeJsonFile(storagePath, { lastSeenId: lastUpdate.id });
 
   return;
 }

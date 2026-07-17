@@ -1,7 +1,6 @@
 import axios from "axios";
 import { fileURLToPath } from "url";
-import fs from 'fs';
-import { readJsonFile } from "../utils/jsonHelper";
+import { readJsonFile } from "../utils/jsonHelper.js";
 
 // resolves relative directory problem
 const cookiesPath = fileURLToPath(
@@ -9,20 +8,19 @@ const cookiesPath = fileURLToPath(
 );
 
 function loadCookiesFromStorage() {
-  try {
-    // checks if file exists
-    if (!fs.existsSync(cookiesPath)) {
-      console.warn("No cookies found! Please add correct data in there.");
-      return "";
-    }
-    const cookieArray = readJsonFile(cookiesPath);
+  const cookieArray = readJsonFile(cookiesPath, null);
+  if (!cookieArray) {
+    console.warn("No cookies found! Please add correct data in there.");
+    return "";
+  }
 
+  try {
     const cookieHeaderString = cookieArray
       .map((cookie) => `${cookie.name}=${cookie.value}`)
       .join("; ");
     return cookieHeaderString;
   } catch (err) {
-    console.error("Something went wrong: ", err);
+    console.error("Something went wrong mapping cookies: ", err);
     return "";
   }
 }

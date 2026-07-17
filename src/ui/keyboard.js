@@ -28,4 +28,8 @@ export class Keyboard {
       [Markup.button.callback('List of muted titles🔕', 'muted-list')]
     ])
    }
+
+   static cancelMenu(){
+    return Markup.keyboard(["Cancel❌"]).resize();
+   }
 }
