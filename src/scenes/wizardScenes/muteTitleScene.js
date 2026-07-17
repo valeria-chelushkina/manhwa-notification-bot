@@ -11,7 +11,7 @@ const mutedPath = fileURLToPath(
   new URL("../../storage/mutedList.json", import.meta.url),
 );
 
-const inlineHandler = new Composer();
+export const inlineHandler = new Composer();
 inlineHandler.action("continue", async (ctx) => {
   await ctx.answerCbQuery();
   await ctx.deleteMessage();

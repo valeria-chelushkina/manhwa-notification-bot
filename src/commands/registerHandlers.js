@@ -52,5 +52,8 @@ export function startupBot(bot, chatId) {
     await ctx.scene.enter("MUTE_TITLE_SCENE");
   });
 
-  bot.action("muted-list", async (ctx) => await mutedListMessage(ctx));
+  bot.action("muted-list", async (ctx) => {
+    await mutedListMessage(ctx);
+    await ctx.scene.enter("UNMUTE_TITLE_SCENE");
+  });
 }
