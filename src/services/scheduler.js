@@ -21,10 +21,9 @@ async function checkChapters(bot, chatId) {
   let lastUpdate = notificationsList[0]; // the last released chapter would be first in the array
 
   let lastSeenId = "";
-  const storedData = readJsonFile(storagePath, null);
-  if (storedData && storedData.lastSeenId) {
-    lastSeenId = storedData.lastSeenId;
-  }
+  const storedData = readJsonFile(storagePath, []);
+  console.log(storedData);
+  if (storedData) lastSeenId = storedData[0].lastSeenId;
 
   // if the newest ID matches history, drop execution early
   if (lastUpdate.id === lastSeenId) {
@@ -37,9 +36,9 @@ async function checkChapters(bot, chatId) {
   // find all items that are newer than checkpoint
   const newItems = [];
   for (const item of notificationsList) {
+    if (item.id === lastSeenId) break;
     // skip muted titles
     if (lookupSet.has(item.title)) continue;
-    if (item.id === lastSeenId) break;
     newItems.push(item);
   }
 
@@ -64,7 +63,8 @@ export function setSchedule(bot, chatId, stop = false) {
   if (!scheduleInterval) checkChapters(bot, chatId);
   scheduleInterval = setInterval(
     () => checkChapters(bot, chatId),
-    10 * 60 * 1000,
+    //10 * 60 * 1000,
+    30 * 1000,
   );
 }
 
