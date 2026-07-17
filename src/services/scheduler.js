@@ -1,7 +1,7 @@
 import { getNotificationsList } from "./parser.js";
 import { sendNewChapter } from "./telegram.js";
+import { readJsonFile, writeJsonFile } from "../utils/jsonHelper.js";
 import { fileURLToPath } from "url";
-import fs from 'fs';
 
 const storagePath = fileURLToPath(
   new URL("../storage/storageHistory.json", import.meta.url),
@@ -17,14 +17,8 @@ async function checkChapters(bot, chatId) {
   let lastUpdate = notificationsList[0]; // the last released chapter would be first in the array
 
   let lastSeenId = "";
-  if (fs.existsSync(storagePath)) {
-    try {
-      const rawData = fs.readFileSync(storagePath, "utf8");
-      if (rawData) lastSeenId = JSON.parse(rawData).lastSeenId;
-    } catch (err) {
-      console.error("What happened?", err);
-    }
-  }
+
+  lastSeenId = readJsonFile(storagePath)?.lastSeenId;
 
   // if the newest ID matches history, drop execution early
   if (lastUpdate.id === lastSeenId) {
@@ -46,7 +40,7 @@ async function checkChapters(bot, chatId) {
   }
 
   // save the fresh checkpoint tracking data
-  fs.writeFileSync(
+  writeJsonFile(
     storagePath,
     JSON.stringify({ lastSeenId: lastUpdate.id }, null, 2),
   );

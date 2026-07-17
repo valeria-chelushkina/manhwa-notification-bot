@@ -1,7 +1,7 @@
 import { Keyboard } from "../../ui/keyboard.js";
 import { getReadingList } from "../../services/parser.js";
-import fs from "fs";
 import { fileURLToPath } from "url";
+import { readJsonFile } from "../../utils/jsonHelper.js";
 
 const mutedPath = fileURLToPath(
   new URL("../../storage/mutedList.json", import.meta.url),
@@ -19,17 +19,7 @@ export async function muteTitleMessage(ctx) {
       );
     }
 
-    if (fs.existsSync(mutedPath)) {
-      try {
-        const rawData = fs.readFileSync(mutedPath, "utf8");
-        if (rawData) {
-          mutedList = JSON.parse(rawData);
-        }
-      } catch (err) {
-        console.log("Couldn't get muted list: ", err);
-        throw err;
-      }
-    }
+    mutedList = readJsonFile(mutedPath);
 
     const lookupSet = new Set(mutedList);
 
@@ -42,8 +32,7 @@ export async function muteTitleMessage(ctx) {
       return formatted;
     });
 
-    const message = `Your reading list:
-${formattedList.join("\n")}
+    const message = `Your reading list:\n${formattedList.join("\n")}
 `;
 
     console.log("Bot sent out reading list.");

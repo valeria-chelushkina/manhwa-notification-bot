@@ -25,7 +25,7 @@ try {
   bot.launch({ dropPendingUpdates: true });
   console.log("Bot has launched");
 } catch (err) {
-  console.error("Something went wrong!");
+  console.error("Something went wrong: ", err);
 }
 
 // Enable graceful stop

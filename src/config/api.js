@@ -1,6 +1,7 @@
 import axios from "axios";
 import { fileURLToPath } from "url";
 import fs from 'fs';
+import { readJsonFile } from "../utils/jsonHelper";
 
 // resolves relative directory problem
 const cookiesPath = fileURLToPath(
@@ -14,8 +15,7 @@ function loadCookiesFromStorage() {
       console.warn("No cookies found! Please add correct data in there.");
       return "";
     }
-    const rawData = fs.readFileSync(cookiesPath, "utf8");
-    const cookieArray = JSON.parse(rawData);
+    const cookieArray = readJsonFile(cookiesPath);
 
     const cookieHeaderString = cookieArray
       .map((cookie) => `${cookie.name}=${cookie.value}`)

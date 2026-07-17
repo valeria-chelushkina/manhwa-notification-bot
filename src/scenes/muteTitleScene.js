@@ -4,7 +4,7 @@ import { Scenes, Markup, Composer } from "telegraf";
 import { compareTitles } from "../utils/helpers.js";
 import { fileURLToPath } from "url";
 import { getReadingList } from "../services/parser.js";
-import fs from "fs";
+import { readJsonFile, writeJsonFile } from "../utils/jsonHelper.js";
 
 const mutedPath = fileURLToPath(
   new URL("../storage/mutedList.json", import.meta.url),
@@ -32,7 +32,6 @@ export const muteTitleScene = new Scenes.WizardScene(
   async (ctx) => {
     try {
       const readingList = await getReadingList();
-
       const titleName = ctx.message.text;
 
       // right now it doesnt resolve a problem if there are two same title names. it will just silence all of them.
@@ -49,33 +48,10 @@ export const muteTitleScene = new Scenes.WizardScene(
       }
 
       // checks if title is already muted
-      if (fs.existsSync(mutedPath)) {
-        try {
-          let listData = [];
-          const rawData = fs.readFileSync(mutedPath, "utf8");
-          if (rawData) {
-            listData = JSON.parse(rawData);
-          }
-
-          console.log(listData);
-          if (compareTitles(listData, titleName)) {
-            ctx.reply(
-              "This title is already muted. Try to choose another one.",
-            );
-            return;
-          }
-        } catch (err) {
-          console.error("Something went wrong:", err);
-
-          ctx.reply(
-            "Something went wrong and couldn't add your title in the muted list. Leaving the scene...",
-          );
-          return ctx.scene.leave();
-        }
-      }
+      if (checkIfMuted(mutedPath, titleName)) return;
 
       // write the file into the mutedList (will be a DB later)
-      if (!appendToJson(mutedPath, titleName)) {
+      if (!addToMuteList(mutedPath, titleName)) {
         ctx.reply(
           "Something went wrong and couldn't add your title in the muted list. Leaving the scene...",
         );
@@ -103,26 +79,20 @@ export const muteTitleScene = new Scenes.WizardScene(
   inlineHandler,
 );
 
-function appendToJson(filePath, data) {
-  let newData = [];
+function addToMuteList(filePath, data) {
+  let readData = readJsonFile(filePath);
+  readData.push(data);
+  return writeJsonFile(
+    filePath,
+    JSON.stringify(readData.map((item) => item.trim().toLowerCase())),
+  );
+}
 
-  if (fs.existsSync(filePath)) {
-    try {
-      const rawData = fs.readFileSync(filePath, "utf8");
-      if (rawData) {
-        newData = JSON.parse(rawData);
-      }
-
-      newData.push(data);
-      const trimmedData = newData.map((item) => {
-        return item.trim().toLowerCase();
-      });
-      fs.writeFileSync(filePath, JSON.stringify(trimmedData));
-      console.log("Title successfully added to a muted list file!");
-      return true;
-    } catch (err) {
-      console.error("Something went wrong:", err);
-      return false;
-    }
+function checkIfMuted(filePath, titleName) {
+  const readingList = readJsonFile(filePath);
+  if (compareTitles(readingList, titleName)) {
+    ctx.reply("This title is already muted. Try to choose another one.");
+    return true;
   }
+  return false;
 }
