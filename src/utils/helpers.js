@@ -23,6 +23,6 @@ export function cleanHtml(data) {
 
 export function compareTitles(readingList, titleName)
 {
-  const checkTitle = obj => obj.title.trim().toLowerCase() === titleName.trim().toLowerCase();
+  const checkTitle = obj => obj.trim().toLowerCase() === titleName.trim().toLowerCase();
   return readingList.some(checkTitle);
 }
