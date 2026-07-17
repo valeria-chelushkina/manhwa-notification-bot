@@ -5,6 +5,7 @@ import { stopScheduleMessage } from "./messages/stopScheduleMessage.js";
 import { setupNotificaitonsMessage } from "./messages/setupNotifMessage.js";
 import { disableTitleMessage } from "./messages/disableTitleMessage.js";
 import { muteTitleMessage } from "./messages/muteTitleMessage.js";
+import { mutedListMessage } from "./messages/mutedListMessage.js";
 import { Keyboard } from "../ui/keyboard.js";
 
 export function startupBot(bot, chatId) {
@@ -41,12 +42,15 @@ export function startupBot(bot, chatId) {
     await stopScheduleMessage(ctx);
   });
 
-  bot.action("disable-title-notif", async (ctx) => {
-    await disableTitleMessage(ctx);
-  });
+  bot.action(
+    "disable-title-notif",
+    async (ctx) => await disableTitleMessage(ctx),
+  );
 
   bot.action("mute-title", async (ctx) => {
     await muteTitleMessage(ctx);
     await ctx.scene.enter("MUTE_TITLE_SCENE");
   });
+
+  bot.action("muted-list", async (ctx) => await mutedListMessage(ctx));
 }

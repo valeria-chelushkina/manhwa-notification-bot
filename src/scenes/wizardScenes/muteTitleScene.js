@@ -1,13 +1,14 @@
 // not completed fully yet.
 
 import { Scenes, Markup, Composer } from "telegraf";
-import { compareTitles } from "../utils/helpers.js";
+import { compareTitles } from "../../utils/helpers.js";
 import { fileURLToPath } from "url";
-import { getReadingList } from "../services/parser.js";
-import { readJsonFile, writeJsonFile } from "../utils/jsonHelper.js";
+import { getReadingList } from "../../services/parser.js";
+import { readJsonFile, writeJsonFile } from "../../utils/jsonHelper.js";
+import { Keyboard } from "../../ui/keyboard.js";
 
 const mutedPath = fileURLToPath(
-  new URL("../storage/mutedList.json", import.meta.url),
+  new URL("../../storage/mutedList.json", import.meta.url),
 );
 
 const inlineHandler = new Composer();
@@ -37,12 +38,12 @@ export const muteTitleScene = new Scenes.WizardScene(
       const titleName = ctx.message.text;
 
       // right now it doesnt resolve a problem if there are two same title names. it will just silence all of them.
-      if (
-        !compareTitles(
-          readingList.map((item) => item.title),
-          titleName,
-        )
-      ) {
+      const compareResult = compareTitles(
+        readingList.map((item) => item.title),
+        titleName,
+      );
+
+      if (!compareResult.isPresent) {
         ctx.reply(
           "No title found with such name in your reading list. Please check again or write it correctly.",
         );
@@ -52,18 +53,18 @@ export const muteTitleScene = new Scenes.WizardScene(
       // checks if title is already muted
       let listData = readJsonFile(mutedPath, []);
 
-      if (compareTitles(listData, titleName)) {
-        await ctx.reply("This title is already muted. Do you want to choose another title to mute?", {
-          ...Markup.inlineKeyboard([
-            Markup.button.callback("Yes✅", "continue"),
-            Markup.button.callback("No❌", "stop"),
-          ]),
-        });
+      if (compareTitles(listData, titleName).isPresent) {
+        await ctx.reply(
+          "This title is already muted. Do you want to choose another title to mute?",
+          {
+            ...Keyboard.confirmationKeyboard(),
+          },
+        );
         return ctx.wizard.next();
       }
 
       // write the file into the mutedList (will be a DB later)
-      if (!appendToJson(mutedPath, titleName)) {
+      if (!appendToJson(mutedPath, compareResult.titleName)) {
         ctx.reply(
           "Something went wrong and couldn't add your title in the muted list. Leaving the scene...",
         );
@@ -73,10 +74,7 @@ export const muteTitleScene = new Scenes.WizardScene(
       await ctx.reply("Added your title to a muted list successfully!");
 
       await ctx.reply("Do you want to choose another title to mute?", {
-        ...Markup.inlineKeyboard([
-          Markup.button.callback("Yes✅", "continue"),
-          Markup.button.callback("No❌", "stop"),
-        ]),
+        ...Keyboard.confirmationKeyboard(),
       });
 
       return ctx.wizard.next();
@@ -94,12 +92,14 @@ export const muteTitleScene = new Scenes.WizardScene(
 function appendToJson(filePath, data) {
   let newData = readJsonFile(filePath, []);
 
+  // if the file was corrupted into a string, reset it to an array
+  if (!Array.isArray(newData)) {
+    newData = [];
+  }
+
   newData.push(data);
-  const trimmedData = newData.map((item) => {
-    return item.trim().toLowerCase();
-  });
-  
-  if (writeJsonFile(filePath, trimmedData)) {
+
+  if (writeJsonFile(filePath, newData)) {
     console.log("Title successfully added to a muted list file!");
     return true;
   } else {

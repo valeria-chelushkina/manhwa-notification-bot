@@ -10,19 +10,23 @@ function escapeHtml(text) {
 
 export function cleanHtml(data) {
   const safeTitle = escapeHtml(data.title);
-  //const cleanTitle = safeTitle.replace(/&amp;amp;/g, "&").replace(/&amp;/g, "&");
   const safeUrl = BASE_URL + escapeHtml(data.url);
   const safeChapter = escapeHtml(data.chapter.toString());
 
   return {
-    //title: data.title,
     url: safeUrl,
     chapter: safeChapter,
   };
 }
 
-export function compareTitles(readingList, titleName)
-{
-  const checkTitle = obj => obj.trim().toLowerCase() === titleName.trim().toLowerCase();
-  return readingList.some(checkTitle);
+export function compareTitles(readingList, titleName) {
+  const checkTitle = (obj) =>
+    obj.trim().toLowerCase() === titleName.trim().toLowerCase();
+
+  const result = {
+    isPresent: readingList.some(checkTitle),
+    titleName: readingList.find(checkTitle) || "",
+  };
+
+  return result;
 }

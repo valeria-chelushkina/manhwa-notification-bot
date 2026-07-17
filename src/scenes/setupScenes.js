@@ -1,5 +1,5 @@
 import { Scenes, session } from "telegraf";
-import { muteTitleScene } from "./muteTitleScene.js";
+import { muteTitleScene } from "./wizardScenes/muteTitleScene.js";
 
 export function setupScenes(bot) {
   const stage = new Scenes.Stage([muteTitleScene]);

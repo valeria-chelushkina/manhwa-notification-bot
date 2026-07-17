@@ -1,4 +1,5 @@
-import fs from 'fs';
+import fs from "fs";
+import { parse } from "path";
 
 export function readJsonFile(filePath, defaultData = null) {
   try {
@@ -9,7 +10,14 @@ export function readJsonFile(filePath, defaultData = null) {
     if (!rawData) {
       return defaultData;
     }
-    return JSON.parse(rawData);
+
+    let parsedData = JSON.parse(rawData);
+    if (!Array.isArray(parsedData)) {
+      let tempData = [];
+      tempData.push(parsedData);
+      parsedData = tempData;
+    }
+    return parsedData;
   } catch (err) {
     console.error(`Error reading JSON file at ${filePath}:`, err);
     return defaultData;

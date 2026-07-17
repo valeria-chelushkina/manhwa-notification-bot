@@ -23,8 +23,7 @@ export async function muteTitleMessage(ctx) {
 
     const formattedList = readingList.map((item, i) => {
       let formatted = `${i + 1}. ${item.title}`;
-      const cleanTitle = item.title.trim().toLowerCase();
-      if (lookupSet.has(cleanTitle)) {
+      if (lookupSet.has(item.title)) {
         formatted += `🔕`;
       }
       return formatted;
