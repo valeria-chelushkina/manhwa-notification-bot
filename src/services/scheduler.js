@@ -22,7 +22,6 @@ async function checkChapters(bot, chatId) {
 
   let lastSeenId = "";
   const storedData = readJsonFile(storagePath, []);
-  console.log(storedData);
   if (storedData) lastSeenId = storedData[0].lastSeenId;
 
   // if the newest ID matches history, drop execution early
@@ -63,8 +62,7 @@ export function setSchedule(bot, chatId, stop = false) {
   if (!scheduleInterval) checkChapters(bot, chatId);
   scheduleInterval = setInterval(
     () => checkChapters(bot, chatId),
-    //10 * 60 * 1000,
-    30 * 1000,
+    10 * 60 * 1000
   );
 }
 

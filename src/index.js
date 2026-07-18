@@ -1,7 +1,6 @@
 import { Telegraf } from "telegraf";
-import { startupBot } from "./commands/registerHandlers.js";
-import { setupScenes } from "./scenes/setupScenes.js";
 import { fileURLToPath } from "url";
+import { setupBot } from "./app/setupBot.js";
 import path from "path";
 import dotenv from "dotenv";
 
@@ -15,11 +14,7 @@ if (!process.env.BOT_TOKEN) {
 const botToken = process.env.BOT_TOKEN;
 const myChatId = process.env.MY_CHAT_ID;
 
-const bot = new Telegraf(botToken);
-
-setupScenes(bot);
-startupBot(bot, myChatId);
-
+const bot = setupBot(botToken, myChatId);
 
 try {
   bot.launch({ dropPendingUpdates: true });

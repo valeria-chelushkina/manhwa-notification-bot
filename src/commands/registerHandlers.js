@@ -1,4 +1,4 @@
-import { startMessage } from "./messages/startMessage.js";
+import { onStartAction } from "./actions/onStartAction.js";
 import { setScheduleMessage } from "./messages/scheduleMessage.js";
 import { unreadListMessage } from "./messages/unreadListMessage.js";
 import { stopScheduleMessage } from "./messages/stopScheduleMessage.js";
@@ -7,6 +7,7 @@ import { disableTitleMessage } from "./messages/disableTitleMessage.js";
 import { muteTitleMessage } from "./messages/muteTitleMessage.js";
 import { mutedListMessage } from "./messages/mutedListMessage.js";
 import { Keyboard } from "../ui/keyboard.js";
+import { Database } from "../db/db.js";
 
 export function startupBot(bot, chatId) {
   let isActive = false;
@@ -19,7 +20,7 @@ export function startupBot(bot, chatId) {
 
   bot.start(async (ctx) => {
     isActive = false;
-    await startMessage(ctx);
+    await onStartAction(ctx);
   });
 
   bot.hears(
