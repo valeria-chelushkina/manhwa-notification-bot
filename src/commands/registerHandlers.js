@@ -39,7 +39,7 @@ export function startupBot(bot, chatId) {
 
   bot.action("start-schedule", async (ctx) => {
     isActive = true;
-    await setScheduleMessage(ctx, bot, chatId);
+    await setScheduleMessage(ctx, bot);
   });
 
   bot.action("stop-schedule", async (ctx) => {

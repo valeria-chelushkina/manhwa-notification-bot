@@ -2,6 +2,7 @@ import pg from "pg";
 import dotenv from "dotenv";
 import { UserRepo } from "./repos/usersRepo.js";
 import { SessionRepo } from "./repos/sessionsRepo.js";
+import { NotificationHistoryRepo } from "./repos/notificationsHistoryRepo.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import { setupEnv } from "../utils/helpers.js";
@@ -21,5 +22,6 @@ export class Database {
 
     this.userRepo = new UserRepo(this.pool);
     this.sessionRepo = new SessionRepo(this.pool);
+    this.notificationHistoryRepo = new NotificationHistoryRepo(this.pool);
   }
 }

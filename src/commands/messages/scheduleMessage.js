@@ -1,9 +1,10 @@
 import { setSchedule } from "../../services/scheduler.js";
 import { Keyboard } from "../../ui/keyboard.js";
 
-export async function setScheduleMessage(ctx, bot, chatId) {
+export async function setScheduleMessage(ctx, bot) {
   try {
     await ctx.answerCbQuery();
+    const chatId = ctx.chat.id;
     setSchedule(bot, chatId);
 
     console.log("Schedule has been started.");

@@ -2,14 +2,11 @@ import { createApiClient } from "../config/api.js";
 
 export async function getNotificationsList(chatId) {
   const apiClient = await createApiClient(chatId);
-
   try {
-    const rawData = await apiClient.get(
-      "/api/v1/user/notifications?scope=comics&unread=1",
+    const rawList = await getList(
+      "/api/v1/user/notifications?scope=comics&unread=1&page=",
+      apiClient,
     );
-    const rawList = rawData.data.result?.items || [];
-
-    if (!Array.isArray(rawList)) return [];
 
     // map elements
     return rawList.map((item) => {
@@ -41,22 +38,11 @@ export async function getNotificationsList(chatId) {
 
 export async function getReadingList(chatId) {
   const apiClient = await createApiClient(chatId);
-
   try {
-    let pageNumber = 1;
-    let rawList = [];
-    while (true) {
-      const url =
-        "/api/v1/user/following-titles?folder_id=1&sort=chapter_updated_desc&page=" +
-        pageNumber;
-      const rawData = await apiClient.get(url);
-      const hasNext = rawData.data.result?.meta.hasNext || false;
-      rawList.push(...(rawData.data.result?.items || []));
-      pageNumber++;
-      if (!hasNext) break;
-    }
-
-    if (!Array.isArray(rawList)) return [];
+    const rawList = await getList(
+      "/api/v1/user/following-titles?folder_id=1&sort=chapter_updated_desc&page=",
+      apiClient,
+    );
 
     return rawList.map((item) => {
       // get rid of HTML tags in the title
@@ -72,4 +58,19 @@ export async function getReadingList(chatId) {
     console.error("Couldn't retrieve reading list data: ", err);
     return [];
   }
+}
+
+async function getList(baseUrl, apiClient) {
+  let pageNumber = 1;
+  let rawList = [];
+  while (true) {
+    const url = baseUrl + pageNumber;
+    const rawData = await apiClient.get(url);
+    const hasNext = rawData.data.result?.meta.hasNext || false;
+    rawList.push(...(rawData.data.result?.items || []));
+    pageNumber++;
+    if (!hasNext) break;
+  }
+  if (!Array.isArray(rawList)) return [];
+  return rawList;
 }

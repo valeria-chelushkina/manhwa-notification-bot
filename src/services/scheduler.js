@@ -2,6 +2,7 @@ import { getNotificationsList } from "./parser.js";
 import { sendNewChapter } from "./telegram.js";
 import { readJsonFile, writeJsonFile } from "../utils/jsonHelper.js";
 import { fileURLToPath } from "url";
+import { Database } from "../db/db.js";
 
 const storagePath = fileURLToPath(
   new URL("../storage/storageHistory.json", import.meta.url),
@@ -11,21 +12,25 @@ const mutedPath = fileURLToPath(
   new URL("../storage/mutedList.json", import.meta.url),
 );
 
+const database = new Database();
+
 let scheduleInterval = null;
 
 async function checkChapters(bot, chatId) {
+
+  const userList = await database.notificationHistoryRepo.getByUserId(chatId);
+  const chapterIds = userList.map(item => item.chapter_id);
+  const chapterIdsSet = new Set(chapterIds);
+
   let notificationsList = await getNotificationsList(chatId);
 
-  if (!notificationsList || notificationsList.length === 0) return; // no new chapters were released
+  if (!notificationsList || notificationsList.length === 0)  return; // no new chapters were released
 
   let lastUpdate = notificationsList[0]; // the last released chapter would be first in the array
 
-  let lastSeenId = "";
-  const storedData = readJsonFile(storagePath, []);
-  if (storedData) lastSeenId = storedData[0].lastSeenId;
-
-  // if the newest ID matches history, drop execution early
-  if (lastUpdate.id === lastSeenId) {
+  // check if lastUpdate had already been seen
+  if(chapterIdsSet.has(lastUpdate))
+  {
     console.log("No changes.");
     return;
   }
@@ -35,8 +40,10 @@ async function checkChapters(bot, chatId) {
   // find all items that are newer than checkpoint
   const newItems = [];
   for (const item of notificationsList) {
-    if (item.id === lastSeenId) break;
-    // skip muted titles
+    if (chapterIdsSet.has(item.id)) break;
+    if(compareNotificaitons(item, chatId));
+    database.notificationHistoryRepo.addNotificationToDB(item.id, chatId, item.title, item.chapter);
+    // skip muted titles - haven't implemented to DB yet
     if (lookupSet.has(item.title)) continue;
     newItems.push(item);
   }
@@ -46,9 +53,6 @@ async function checkChapters(bot, chatId) {
   for (const item of newItems) {
     await sendNewChapter(bot, chatId, item);
   }
-
-  // save the fresh checkpoint tracking data
-  writeJsonFile(storagePath, { lastSeenId: lastUpdate.id });
 
   return;
 }
@@ -74,4 +78,11 @@ export function stopSchedule() {
   } else {
     console.log("No active interval to stop.");
   }
+}
+
+function compareNotificaitons(item, chatId)
+{
+  const comparedNotification = await database.notificationHistoryRepo.getNotificationById(chatId, item.title, item.chapter);
+  if(comparedNotification) return true;
+  return false;
 }
