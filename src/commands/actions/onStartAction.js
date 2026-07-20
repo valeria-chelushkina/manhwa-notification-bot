@@ -1,6 +1,7 @@
 import { loginMessage } from "../messages/loginMessage.js";
+import { mainMenuMessage } from "../messages/mainMenuMessage.js";
 
-export async function onStartAction(ctx) {
+export async function onStartAction(ctx, bot) {
   const chatId = ctx.chat.id;
   const username = ctx.from.username || ctx.from.first_name || "User";
   const user = await ctx.db.userRepo.getUserById(chatId);
@@ -13,9 +14,25 @@ export async function onStartAction(ctx) {
     );
   } else {
     console.log(
-      `User already exists: ${user}; ChatId = ${chatId}, username = ${username}`,
+      `User already exists: ChatId = ${chatId}, username = ${username}`,
     );
+    const userSession = await ctx.db.sessionRepo.getUserSessionById(chatId);
+    if (
+      userSession &&
+      userSession.cookies &&
+      (userSession.is_active === true || userSession.is_active === "true")
+    ) {
+      console.log(
+        `User ${chatId} already has active cookies. Redirecting to options screen right away...`,
+      );
+      await bot.telegram.sendMessage(
+        chatId,
+        "You are already logged in and your cookies are active.\nIf you want to log onto your another account - choose to log out first.\nRedirecting you to main page...",
+        { parse_mode: "HTML" },
+      );
+      return await mainMenuMessage(bot, chatId);
+    }
   }
 
-  await loginMessage(ctx);
+  return await loginMessage(ctx);
 }

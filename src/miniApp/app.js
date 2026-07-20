@@ -6,7 +6,7 @@ import path from "path";
 import axios from "axios";
 import { setupEnv } from "../utils/helpers.js";
 import { Database } from "../db/db.js";
-import { optionsMessage } from "../commands/messages/optionsMessage.js";
+import { mainMenuMessage } from "../commands/messages/mainMenuMessage.js";
   import fs from "fs";
   import { loginMessage } from "../commands/messages/loginMessage.js";
 
@@ -129,7 +129,7 @@ export async function startServer(bot) {
         "You logged in successfully! 🎉 Now you can set up your notifications.",
       );
 
-      optionsMessage(bot, userId);
+      mainMenuMessage(bot, userId);
 
       res.sendStatus(200);
     } catch (err) {

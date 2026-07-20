@@ -39,3 +39,8 @@ export function setupEnv(filePath){
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   dotenv.config({ path: path.resolve(__dirname, filePath) });
 }
+
+export async function getTgChatId()
+{
+  
+}

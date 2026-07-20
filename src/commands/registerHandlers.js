@@ -6,7 +6,6 @@ import { setupNotificaitonsMessage } from "./messages/setupNotifMessage.js";
 import { disableTitleMessage } from "./messages/disableTitleMessage.js";
 import { muteTitleMessage } from "./messages/muteTitleMessage.js";
 import { mutedListMessage } from "./messages/mutedListMessage.js";
-import { loginAction } from "./actions/loginAcrion.js";
 import { Keyboard } from "../ui/keyboard.js";
 import { Database } from "../db/db.js";
 import { Markup } from "telegraf";
@@ -16,14 +15,16 @@ export function startupBot(bot, chatId) {
   let isActive = false;
 
   bot.telegram
-    .sendMessage(chatId, "🤖Bot has rebooted. Menu refreshed.", {
-      ...Markup.removeKeyboard(),
-    })
+    .sendMessage(
+      chatId,
+      "🤖Bot has rebooted. Menu refreshed.\nPress /start to start!",
+      { parse_mode: "HTML", ...Markup.removeKeyboard() },
+    )
     .catch((err) => console.error("Could not reset menu on startup:", err));
 
   bot.start(async (ctx) => {
     isActive = false;
-    await onStartAction(ctx);
+    await onStartAction(ctx, bot);
   });
 
   bot.hears(

@@ -1,6 +1,6 @@
 import { Keyboard } from "../../ui/keyboard.js";
 
-export async function optionsMessage(bot, chatId) {
+export async function mainMenuMessage(bot, chatId) {
   try {
     const formattedMessage = `A short list what this bot can do: it will send out notifications of your following titles every time a new chapter comes out.
 - Start the schedule for notifications to start sending.
