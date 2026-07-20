@@ -25,6 +25,17 @@ export class Keyboard {
     ]);
   }
 
+  static mainMenu() {
+    return Markup.keyboard([
+      "Set up notifications⚙️",
+      "Unread notifications🔔",
+    ]).resize();
+  }
+
+  static loginMenu(URL) {
+    return Markup.keyboard([Markup.button.webApp("Login🌐", URL)]).resize();
+  }
+
   static scheduleOnNotifMenu() {
     return Markup.inlineKeyboard([
       [Markup.button.callback("Stop sending notifications❌", "stop-schedule")],

@@ -3,24 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css">
     <title>Login page</title>
   </head>
   <body>
-    <h1>Login Page</h1>
-    <h3>
-      Please login into your *** account. If you don't have an account there,
-      you should create it first.
-    </h3>
-    <h3>All data is confidential.</h3>
-    <form id="field">
-      <label for="username">Email or Username:</label>
-      <input type="text" id="username" placeholder="you@domain.com" />
-      <label for="password">Password</label>
-      <input type="password" id="password" placeholder="********" />
-      <button type="submit">Sign in</button>
-    </form>
+    <main>
+      <h1>Login Page</h1>
+      <h3>
+        Please login into your comix account. If you don't have an account there,
+        you should create it first.
+      </h3>
+      <h3>All data is confidential!</h3>
+      <form id="field">
+        <label for="username">Email or Username:</label>
+        <input type="text" id="username" placeholder="you@domain.com" />
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="********" />
+        <button type="submit">Sign in</button>
+      </form>
 
-    <p id="status-message"></p>
+      <p id="status-message"></p>
+    </main>
+
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="./index.js"></script>
   </body>

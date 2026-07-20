@@ -1,4 +1,5 @@
 import { startMessage } from "../messages/startMessage.js";
+import { loginMessage } from "../messages/loginMessage.js";
 
 export async function onStartAction(ctx) {
   const chatId = ctx.chat.id;
@@ -17,5 +18,5 @@ export async function onStartAction(ctx) {
     );
   }
 
-  await startMessage(ctx);
+  await loginMessage(ctx);
 }
