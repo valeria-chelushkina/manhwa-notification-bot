@@ -1,34 +1,27 @@
-window.Telegram.WebApp.ready();
+const app = window.Telegram.WebApp;
+app.ready();
 
-const usernameField = document.getElementById("username");
-const passwordField = document.getElementById("password");
 const statusMsg = document.getElementById("status-message");
-const signInBtn = document.getElementById("sign-in-btn");
 const field = document.getElementById("field");
 
-console.log("I am here!!!!")
-
 field.addEventListener("submit", async function(event) {
-    console.log("I am here!")
   event.preventDefault();
-  const usernameValue = document.getElementById("username").value;
-  const passwordValue = document.getElementById("password").value;
-  const tgId =
-    window.Telegram.WebApp.initDataUnsafe?.user?.id || "unknown_test_user";
+  
+  const cookies = document.getElementById("cookies").value;
+  const tgId = app.initDataUnsafe?.user?.id || "unknown_test_user";
 
-  statusMsg.innerText = "Sending data to server...";
+  if (!cookies) {
+    statusMsg.innerText = "Please enter your cookies.";
+    return;
+  }
 
-  await getLoginData(usernameValue, passwordValue, tgId);
-});
+  statusMsg.innerText = "Verifying cookies...";
 
-async function getLoginData(username, password, tgId) {
   try {
     const response = await fetch("/api/login", {
       method: "POST",
       body: JSON.stringify({
-        username: username,
-        password: password,
-        telegramId: tgId,
+        cookies: cookies
       }),
       headers: {
         "Content-type": "application/json",
@@ -37,17 +30,17 @@ async function getLoginData(username, password, tgId) {
 
     const result = await response.json();
     if (result.success) {
-      console.log("Data posted to api successfully.");
-      statusMsg.innerText = "Success! Closing app...";
-
+      statusMsg.innerText = "Success! Logged in securely.";
+      
+      // close the app and send a signal back to the bot
       setTimeout(() => {
-        window.Telegram.WebApp.close();
+        app.sendData(JSON.stringify({ event: "login_success" }));
       }, 1500);
     } else {
-      statusMsg.innerText = "Error logging in.";
+      statusMsg.innerText = "Error: " + (result.message || "Invalid cookies.");
     }
   } catch (err) {
     console.error("Error connecting to server: ", err);
     statusMsg.innerText = "Failed to connect to server.";
   }
-}
+});
