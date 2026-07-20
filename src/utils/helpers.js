@@ -1,4 +1,8 @@
-const BASE_URL = "https://comix.to";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+import path from "path";
+
+setupEnv("../../.env")
 
 function escapeHtml(text) {
   if (!text) return "";
@@ -10,7 +14,7 @@ function escapeHtml(text) {
 
 export function cleanHtml(data) {
   const safeTitle = escapeHtml(data.title);
-  const safeUrl = BASE_URL + escapeHtml(data.url);
+  const safeUrl = process.env.BASE_URL + escapeHtml(data.url);
   const safeChapter = escapeHtml(data.chapter.toString());
 
   return {
@@ -29,4 +33,9 @@ export function compareTitles(readingList, titleName) {
   };
 
   return result;
+}
+
+export function setupEnv(filePath){
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  dotenv.config({ path: path.resolve(__dirname, filePath) });
 }

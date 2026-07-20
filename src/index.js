@@ -1,11 +1,8 @@
 import { Telegraf } from "telegraf";
-import { fileURLToPath } from "url";
 import { setupBot } from "./app/setupBot.js";
-import path from "path";
-import dotenv from "dotenv";
+import { setupEnv } from "./utils/helpers.js";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
+setupEnv("../.env");
 
 if (!process.env.BOT_TOKEN) {
   throw new Error("Bot token is not present! Provide a bot token.");

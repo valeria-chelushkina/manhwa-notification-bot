@@ -12,8 +12,8 @@ export function setupBot(botToken, chatId) {
     return next();
   });
 
-  startupBot(bot, chatId);
   setupScenes(bot);
+  startupBot(bot, chatId);
 
   return bot;
 }

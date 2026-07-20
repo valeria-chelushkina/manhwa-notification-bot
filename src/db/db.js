@@ -3,10 +3,10 @@ import dotenv from "dotenv";
 import { UserRepo } from "./repos/userRepo.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import { setupEnv } from "../utils/helpers.js";
 
 const { Pool } = pg;
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
+setupEnv("../../.env");
 
 export class Database {
   constructor() {

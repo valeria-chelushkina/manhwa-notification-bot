@@ -1,6 +1,9 @@
 import axios from "axios";
 import { fileURLToPath } from "url";
 import { readJsonFile } from "../utils/jsonHelper.js";
+import { setupEnv } from "../utils/helpers.js";
+
+setupEnv("../../.env");
 
 // resolves relative directory problem
 const cookiesPath = fileURLToPath(
@@ -25,13 +28,13 @@ function loadCookiesFromStorage() {
   }
 }
 
+// will change cookies and userAgent
 const apiClient = axios.create({
-  baseURL: "https://comix.to",
+  baseURL: process.env.BASE_URL,
   headers: {
     Cookie: loadCookiesFromStorage(),
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)...",
   },
-  transformRequest: [(data) => data],
 });
 
 export default apiClient;

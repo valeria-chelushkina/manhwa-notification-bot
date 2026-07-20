@@ -3,7 +3,7 @@ import apiClient from "../config/api.js";
 export async function getNotificationsList() {
   try {
     const rawData = await apiClient.get(
-      "https://comix.to/api/v1/user/notifications?scope=comics&unread=1",
+      "/api/v1/user/notifications?scope=comics&unread=1",
     );
     const rawList = rawData.data.result?.items || [];
 
@@ -44,7 +44,7 @@ export async function getReadingList() {
     let rawList = [];
     while(true)
     {
-      const url = 'https://comix.to/api/v1/user/following-titles?folder_id=1&sort=chapter_updated_desc&page=' + pageNumber;
+      const url = '/api/v1/user/following-titles?folder_id=1&sort=chapter_updated_desc&page=' + pageNumber;
       const rawData = await apiClient.get(url);
       const hasNext = rawData.data.result?.meta.hasNext || false;
       rawList.push(...(rawData.data.result?.items || []));
