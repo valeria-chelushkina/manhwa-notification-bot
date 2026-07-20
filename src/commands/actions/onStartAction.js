@@ -1,4 +1,3 @@
-import { startMessage } from "../messages/startMessage.js";
 import { loginMessage } from "../messages/loginMessage.js";
 
 export async function onStartAction(ctx) {

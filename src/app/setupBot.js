@@ -2,6 +2,7 @@ import { Telegraf } from "telegraf";
 import { Database } from "../db/db.js";
 import { startupBot } from "../commands/registerHandlers.js";
 import { setupScenes } from "../scenes/setupScenes.js";
+import { startServer } from "../miniApp/app.js";
 
 export function setupBot(botToken, chatId) {
   const bot = new Telegraf(botToken);
@@ -14,6 +15,7 @@ export function setupBot(botToken, chatId) {
 
   setupScenes(bot);
   startupBot(bot, chatId);
+  startServer(bot);
 
   return bot;
 }

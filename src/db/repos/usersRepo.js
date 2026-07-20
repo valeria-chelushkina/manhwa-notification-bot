@@ -21,7 +21,7 @@ export class UserRepo {
     try {
       const res = await this.pool.query(query, [chatId]);
       if (res.rows.length === 0) return null;
-      return res.rows;
+      return res.rows[0];
     } catch (err) {
       console.error("Couldn't get user from DB by ID: ", err);
       return null;

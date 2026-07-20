@@ -33,7 +33,7 @@ export class Keyboard {
   }
 
   static loginMenu(URL) {
-    return Markup.keyboard([Markup.button.webApp("Login🌐", URL)]).resize();
+    return Markup.inlineKeyboard([Markup.button.webApp("Login🌐", URL)]);
   }
 
   static scheduleOnNotifMenu() {

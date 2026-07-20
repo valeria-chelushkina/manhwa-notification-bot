@@ -1,6 +1,7 @@
 import pg from "pg";
 import dotenv from "dotenv";
-import { UserRepo } from "./repos/userRepo.js";
+import { UserRepo } from "./repos/usersRepo.js";
+import { SessionRepo } from "./repos/sessionsRepo.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import { setupEnv } from "../utils/helpers.js";
@@ -19,5 +20,6 @@ export class Database {
     });
 
     this.userRepo = new UserRepo(this.pool);
+    this.sessionRepo = new SessionRepo(this.pool);
   }
 }
