@@ -14,7 +14,7 @@ const mutedPath = fileURLToPath(
 let scheduleInterval = null;
 
 async function checkChapters(bot, chatId) {
-  let notificationsList = await getNotificationsList();
+  let notificationsList = await getNotificationsList(chatId);
 
   if (!notificationsList || notificationsList.length === 0) return; // no new chapters were released
 

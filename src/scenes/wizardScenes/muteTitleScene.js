@@ -34,7 +34,8 @@ export const muteTitleScene = new Scenes.WizardScene(
   },
   async (ctx) => {
     try {
-      const readingList = await getReadingList();
+      const chatId = ctx.chat.id;
+      const readingList = await getReadingList(chatId);
       const titleName = ctx.message.text;
 
       // right now it doesnt resolve a problem if there are two same title names. it will just silence all of them.

@@ -10,7 +10,8 @@ const mutedPath = fileURLToPath(
 export async function muteTitleMessage(ctx) {
   try {
     await ctx.answerCbQuery();
-    const readingList = await getReadingList();
+    const chatId = ctx.chat.id;
+    const readingList = await getReadingList(chatId);
     let mutedList = readJsonFile(mutedPath, []);
 
     if (!Array.isArray(readingList) || readingList.length === 0) {

@@ -1,6 +1,8 @@
-import apiClient from "../config/api.js";
+import { createApiClient } from "../config/api.js";
 
-export async function getNotificationsList() {
+export async function getNotificationsList(chatId) {
+  const apiClient = await createApiClient(chatId);
+
   try {
     const rawData = await apiClient.get(
       "/api/v1/user/notifications?scope=comics&unread=1",
@@ -9,12 +11,12 @@ export async function getNotificationsList() {
 
     if (!Array.isArray(rawList)) return [];
 
-    // Map elements
+    // map elements
     return rawList.map((item) => {
-      // Get rid of HTML tags in the title
+      // get rid of HTML tags in the title
       const cleanTitle = item.contentHtml.replace(/<\/?[^>]+(>|$)/g, "");
 
-      // Get the chapter number
+      // get the chapter number
       const chapterNumber = parseInt(
         item.subtext.replace(/[^\d.]/g, "").slice(1),
       );
@@ -37,25 +39,27 @@ export async function getNotificationsList() {
   }
 }
 
-export async function getReadingList() {
-  try {
+export async function getReadingList(chatId) {
+  const apiClient = await createApiClient(chatId);
 
+  try {
     let pageNumber = 1;
     let rawList = [];
-    while(true)
-    {
-      const url = '/api/v1/user/following-titles?folder_id=1&sort=chapter_updated_desc&page=' + pageNumber;
+    while (true) {
+      const url =
+        "/api/v1/user/following-titles?folder_id=1&sort=chapter_updated_desc&page=" +
+        pageNumber;
       const rawData = await apiClient.get(url);
       const hasNext = rawData.data.result?.meta.hasNext || false;
       rawList.push(...(rawData.data.result?.items || []));
       pageNumber++;
-      if(!hasNext) break;
+      if (!hasNext) break;
     }
 
     if (!Array.isArray(rawList)) return [];
 
     return rawList.map((item) => {
-      // Get rid of HTML tags in the title
+      // get rid of HTML tags in the title
       const cleanTitle = item.title.replace(/<\/?[^>]+(>|$)/g, "");
 
       return {

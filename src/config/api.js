@@ -2,38 +2,52 @@ import axios from "axios";
 import { fileURLToPath } from "url";
 import { readJsonFile } from "../utils/jsonHelper.js";
 import { setupEnv } from "../utils/helpers.js";
+import { Database } from "../db/db.js";
 
 setupEnv("../../.env");
 
-// resolves relative directory problem
-const cookiesPath = fileURLToPath(
-  new URL("../storage/cookies.json", import.meta.url),
-);
+const database = new Database();
 
-function loadCookiesFromStorage() {
-  const cookieArray = readJsonFile(cookiesPath, null);
-  if (!cookieArray) {
-    console.warn("No cookies found! Please add correct data in there.");
-    return "";
+async function getCookieHeaderById(chatId) {
+  const userSession = await database.sessionRepo.getUserSessionById(chatId);
+
+  if (!userSession || !userSession.cookies) {
+    console.warn(`No cookies for user ${chatId} found!`);
+    return null;
   }
 
   try {
-    const cookieHeaderString = cookieArray
-      .map((cookie) => `${cookie.name}=${cookie.value}`)
+    let cookieArray;
+
+    if (typeof userSession.cookies === "string") {
+      cookieArray = JSON.parse(userSession.cookies);
+    } else {
+      cookieArray = userSession.cookies;
+    }
+
+    if (!Array.isArray(cookieArray)) {
+      console.error("Cookies field in DB is not an array:", cookieArray);
+      return null;
+    }
+
+    const cookieString = cookieArray
+      .map((c) => `${c.name}=${c.value}`)
       .join("; ");
-    return cookieHeaderString;
+
+    return cookieString;
   } catch (err) {
-    console.error("Something went wrong mapping cookies: ", err);
-    return "";
+    console.error("Error parsing cookies from DB:", err);
+    return null;
   }
 }
 
-const apiClient = axios.create({
-  baseURL: process.env.BASE_URL,
-  headers: {
-    Cookie: loadCookiesFromStorage(),
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)...",
-  },
-});
-
-export default apiClient;
+export async function createApiClient(chatId) {
+  const apiClient = axios.create({
+    baseURL: process.env.BASE_URL,
+    headers: {
+      Cookie: await getCookieHeaderById(chatId),
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)...",
+    },
+  });
+  return apiClient;
+}

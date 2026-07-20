@@ -17,6 +17,7 @@ export async function onStartAction(ctx, bot) {
       `User already exists: ChatId = ${chatId}, username = ${username}`,
     );
     const userSession = await ctx.db.sessionRepo.getUserSessionById(chatId);
+    console.log("USERSESSION" + userSession.cookies[0] + " " + userSession.is_active + " " + userSession.created_at + " " + userSession.telegram_id);
     if (
       userSession &&
       userSession.cookies &&

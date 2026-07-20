@@ -6,7 +6,8 @@ import { lookup } from "dns";
 
 export async function unreadListMessage(ctx) {
   try {
-    let unreadList = await getNotificationsList();
+    const chatId = ctx.chat.id;
+    let unreadList = await getNotificationsList(chatId);
     let notificationContent = "";
 
     if (!Array.isArray(unreadList) || unreadList.length === 0) {
