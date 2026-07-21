@@ -3,6 +3,7 @@
 import { Scenes, Markup, Composer } from "telegraf";
 import { compareTitles } from "../../utils/helpers.js";
 import { getReadingList } from "../../services/parser.js";
+import { mainMenuMessage } from "../../commands/messages/mainMenuMessage.js";
 import { Keyboard } from "../../ui/keyboard.js";
 import { Database } from "../../db/db.js";
 
@@ -26,6 +27,7 @@ export const muteTitleScene = new Scenes.WizardScene(
   (ctx) => {
     ctx.reply(
       "To mute specific title write its full name (just copy it from the list).",
+      Markup.removeKeyboard(),
     );
     ctx.wizard.next();
   },
@@ -88,3 +90,10 @@ export const muteTitleScene = new Scenes.WizardScene(
   },
   inlineHandler,
 );
+
+muteTitleScene.leave(async (ctx) => {
+  const chatId = ctx.chat.id;
+  const bot = ctx.telegram;
+
+  await mainMenuMessage(bot, chatId);
+});

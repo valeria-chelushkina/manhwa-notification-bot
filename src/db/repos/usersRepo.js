@@ -51,4 +51,15 @@ export class UserRepo {
       throw err;
     }
   }
+
+  async updateMutedList(chatId, list) {
+    const query = `UPDATE users SET muted_list = $1 WHERE telegram_id = $2`;
+
+    try {
+      await this.pool.query(query, [list, chatId]);
+    } catch (err) {
+      console.error("Couldn't upate muted list in DB: ", err);
+      throw err;
+    }
+  }
 }

@@ -1,14 +1,14 @@
 import { fileURLToPath } from "url";
 import { readJsonFile } from "../../utils/jsonHelper.js";
+import { Database } from "../../db/db.js";
 
-const mutedPath = fileURLToPath(
-  new URL("../../storage/mutedList.json", import.meta.url),
-);
+const database = new Database().userRepo;
 
 export async function mutedListMessage(ctx) {
   try {
     await ctx.answerCbQuery();
-    const mutedList = readJsonFile(mutedPath, []);
+    const chatId = ctx.chat.id;
+    const mutedList = await database.getMutedListById(chatId);
 
     if (!Array.isArray(mutedList) || mutedList.length === 0) {
       return ctx.reply("Your muted list is empty. No titles muted.");

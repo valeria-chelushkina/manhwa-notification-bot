@@ -2,9 +2,13 @@
 
 import { Scenes, Markup, Composer } from "telegraf";
 import { compareTitles } from "../../utils/helpers.js";
+import { mainMenuMessage } from "../../commands/messages/mainMenuMessage.js";
 import { fileURLToPath } from "url";
 import { readJsonFile, writeJsonFile } from "../../utils/jsonHelper.js";
 import { Keyboard } from "../../ui/keyboard.js";
+import { Database } from "../../db/db.js";
+
+const database = new Database().userRepo;
 
 const startStepHandler = new Composer();
 startStepHandler.action("continue-unmute", async (ctx) => {
@@ -34,10 +38,6 @@ endStepHandler.action("stop", async (ctx) => {
   return ctx.scene.leave();
 });
 
-const mutedPath = fileURLToPath(
-  new URL("../../storage/mutedList.json", import.meta.url),
-);
-
 export const unmuteTitleScene = new Scenes.WizardScene(
   "UNMUTE_TITLE_SCENE",
   (ctx) => {
@@ -52,8 +52,9 @@ export const unmuteTitleScene = new Scenes.WizardScene(
   startStepHandler,
   async (ctx) => {
     try {
-      let listData = readJsonFile(mutedPath, []);
+      const chatId = ctx.chat.id;
       const titleName = ctx.message.text;
+      let listData = await database.getMutedListById(chatId);
       const compareResult = compareTitles(listData, titleName);
 
       if (!compareResult.isPresent) {
@@ -63,30 +64,38 @@ export const unmuteTitleScene = new Scenes.WizardScene(
         return;
       }
 
+      console.log(compareResult.isPresent + " " + compareResult.titleName);
+
       // remove title from muted list
       const index = listData.indexOf(compareResult.titleName);
+
+      console.log(index);
       if (index > -1) {
         listData.splice(index, 1);
       }
 
+      console.log(listData);
+
       // write new array into the muted list
-      if (!writeJsonFile(mutedPath, listData)) {
-        ctx.reply(
+      try {
+        await database.updateMutedList(chatId, listData);
+
+        await ctx.reply("Unmuted title successfully!");
+
+        await ctx.reply("Do you want to choose another title to unmute?", {
+          ...Keyboard.confirmationKeyboard(),
+        });
+
+        return ctx.wizard.next();
+      } catch (err) {
+        await ctx.reply(
           "Something went wrong and couldn't delete your title from muted list. Leaving the scene...",
         );
         return ctx.scene.leave();
       }
-
-      await ctx.reply("Unmuted title successfully!");
-
-      await ctx.reply("Do you want to choose another title to unmute?", {
-        ...Keyboard.confirmationKeyboard(),
-      });
-
-      return ctx.wizard.next();
     } catch (err) {
       console.error("Couldn't get a muted list.");
-      ctx.reply(
+      await ctx.reply(
         "Something went wrong and couldn't get your muted list. Leaving the scene...",
       );
       return ctx.scene.leave();
@@ -94,3 +103,5 @@ export const unmuteTitleScene = new Scenes.WizardScene(
   },
   endStepHandler,
 );
+
+unmuteTitleScene.leave(async (ctx) => await mainMenuMessage(ctx));
