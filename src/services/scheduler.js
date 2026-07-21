@@ -1,16 +1,6 @@
 import { getNotificationsList } from "./parser.js";
 import { sendNewChapter } from "./telegram.js";
-import { readJsonFile, writeJsonFile } from "../utils/jsonHelper.js";
-import { fileURLToPath } from "url";
 import { Database } from "../db/db.js";
-
-const storagePath = fileURLToPath(
-  new URL("../storage/storageHistory.json", import.meta.url),
-);
-
-const mutedPath = fileURLToPath(
-  new URL("../storage/mutedList.json", import.meta.url),
-);
 
 const database = new Database();
 
@@ -35,15 +25,15 @@ async function checkChapters(bot, chatId) {
     return;
   }
 
-  const lookupSet = new Set(readJsonFile(mutedPath, []));
+  const mutedList = await database.userRepo.getMutedListById(chatId);
+  const lookupSet = new Set(mutedList);
 
   // find all items that are newer than checkpoint
   const newItems = [];
   for (const item of notificationsList) {
     if (chapterIdsSet.has(item.id)) break;
-    if(compareNotificaitons(item, chatId));
+    if(await compareNotificaitons(item, chatId));
     database.notificationHistoryRepo.addNotificationToDB(item.id, chatId, item.title, item.chapter);
-    // skip muted titles - haven't implemented to DB yet
     if (lookupSet.has(item.title)) continue;
     newItems.push(item);
   }
@@ -80,7 +70,7 @@ export function stopSchedule() {
   }
 }
 
-function compareNotificaitons(item, chatId)
+async function compareNotificaitons(item, chatId)
 {
   const comparedNotification = await database.notificationHistoryRepo.getNotificationById(chatId, item.title, item.chapter);
   if(comparedNotification) return true;

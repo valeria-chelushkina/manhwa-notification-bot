@@ -27,4 +27,28 @@ export class UserRepo {
       return null;
     }
   }
+
+  async getMutedListById(chatId) {
+    const query = `SELECT muted_list FROM users WHERE telegram_id = $1`;
+
+    try {
+      const res = await this.pool.query(query, [chatId]);
+      if (res.rows.length === 0) return null;
+      return res.rows[0].muted_list;
+    } catch (err) {
+      console.error("Couldn't get muted list from DB by ID: ", err);
+      return null;
+    }
+  }
+
+  async addToMutedList(chatId, title) {
+    const query = `UPDATE users SET muted_list = array_append(muted_list, $1) WHERE telegram_id = $2`;
+
+    try {
+      await this.pool.query(query, [title, chatId]);
+    } catch (err) {
+      console.error("Couldn't add title to muted list to DB: ", err);
+      throw err;
+    }
+  }
 }

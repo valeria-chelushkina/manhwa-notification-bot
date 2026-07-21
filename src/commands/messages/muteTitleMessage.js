@@ -2,17 +2,20 @@ import { Keyboard } from "../../ui/keyboard.js";
 import { getReadingList } from "../../services/parser.js";
 import { fileURLToPath } from "url";
 import { readJsonFile } from "../../utils/jsonHelper.js";
+import { Database } from "../../db/db.js";
 
 const mutedPath = fileURLToPath(
   new URL("../../storage/mutedList.json", import.meta.url),
 );
+
+const database = new Database();
 
 export async function muteTitleMessage(ctx) {
   try {
     await ctx.answerCbQuery();
     const chatId = ctx.chat.id;
     const readingList = await getReadingList(chatId);
-    let mutedList = readJsonFile(mutedPath, []);
+    const mutedList = await database.userRepo.getMutedListById(chatId);
 
     if (!Array.isArray(readingList) || readingList.length === 0) {
       return ctx.reply(

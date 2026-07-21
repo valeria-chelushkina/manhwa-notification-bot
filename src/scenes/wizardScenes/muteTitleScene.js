@@ -2,14 +2,11 @@
 
 import { Scenes, Markup, Composer } from "telegraf";
 import { compareTitles } from "../../utils/helpers.js";
-import { fileURLToPath } from "url";
 import { getReadingList } from "../../services/parser.js";
-import { readJsonFile, writeJsonFile } from "../../utils/jsonHelper.js";
 import { Keyboard } from "../../ui/keyboard.js";
+import { Database } from "../../db/db.js";
 
-const mutedPath = fileURLToPath(
-  new URL("../../storage/mutedList.json", import.meta.url),
-);
+const database = new Database();
 
 export const inlineHandler = new Composer();
 inlineHandler.action("continue", async (ctx) => {
@@ -39,6 +36,7 @@ export const muteTitleScene = new Scenes.WizardScene(
       const titleName = ctx.message.text;
 
       // right now it doesnt resolve a problem if there are two same title names. it will just silence all of them.
+      // check if title exists in reading list
       const compareResult = compareTitles(
         readingList.map((item) => item.title),
         titleName,
@@ -52,7 +50,7 @@ export const muteTitleScene = new Scenes.WizardScene(
       }
 
       // checks if title is already muted
-      let listData = readJsonFile(mutedPath, []);
+      let listData = await database.userRepo.getMutedListById(chatId);
 
       if (compareTitles(listData, titleName).isPresent) {
         await ctx.reply(
@@ -64,21 +62,22 @@ export const muteTitleScene = new Scenes.WizardScene(
         return ctx.wizard.next();
       }
 
-      // write the file into the mutedList (will be a DB later)
-      if (!appendToJson(mutedPath, compareResult.titleName)) {
+      try {
+        await database.userRepo.addToMutedList(chatId, compareResult.titleName);
+
+        await ctx.reply("Added your title to a muted list successfully!");
+
+        await ctx.reply("Do you want to choose another title to mute?", {
+          ...Keyboard.confirmationKeyboard(),
+        });
+
+        return ctx.wizard.next();
+      } catch (err) {
         ctx.reply(
           "Something went wrong and couldn't add your title in the muted list. Leaving the scene...",
         );
         return ctx.scene.leave();
       }
-
-      await ctx.reply("Added your title to a muted list successfully!");
-
-      await ctx.reply("Do you want to choose another title to mute?", {
-        ...Keyboard.confirmationKeyboard(),
-      });
-
-      return ctx.wizard.next();
     } catch (err) {
       console.error("Couldn't get a reading list.");
       ctx.reply(
@@ -89,22 +88,3 @@ export const muteTitleScene = new Scenes.WizardScene(
   },
   inlineHandler,
 );
-
-function appendToJson(filePath, data) {
-  let newData = readJsonFile(filePath, []);
-
-  // if the file was corrupted into a string, reset it to an array
-  if (!Array.isArray(newData)) {
-    newData = [];
-  }
-
-  newData.push(data);
-
-  if (writeJsonFile(filePath, newData)) {
-    console.log("Title successfully added to a muted list file!");
-    return true;
-  } else {
-    console.error("Something went wrong writing to file.");
-    return false;
-  }
-}
