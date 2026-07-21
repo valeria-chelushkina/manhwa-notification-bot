@@ -1,5 +1,6 @@
 import { setSchedule } from "../../services/scheduler.js";
 import { Keyboard } from "../../ui/keyboard.js";
+import { checkError } from "../../utils/helpers.js";
 
 export async function setScheduleMessage(ctx, bot) {
   try {
@@ -13,9 +14,8 @@ export async function setScheduleMessage(ctx, bot) {
       { parse_mode: "HTML" },
     );
   } catch (err) {
-    console.error("Error while starting a schedule: ", err);
-    return ctx.reply(
-      "Sorry, something went wrong. Couldn't set up a schedule.",
-    );
+    const errMsg = "Error while starting a schedule: ";
+    const ctxMsg = "Sorry, something went wrong. Couldn't set up a schedule.";
+    return await checkError(err, ctx, errMsg, ctxMsg);
   }
 }

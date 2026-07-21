@@ -6,6 +6,7 @@ import { getReadingList } from "../../services/parser.js";
 import { mainMenuMessage } from "../../commands/messages/mainMenuMessage.js";
 import { Keyboard } from "../../ui/keyboard.js";
 import { Database } from "../../db/db.js";
+import { checkError } from "../../utils/helpers.js";
 
 const database = new Database();
 
@@ -81,10 +82,11 @@ export const muteTitleScene = new Scenes.WizardScene(
         return ctx.scene.leave();
       }
     } catch (err) {
-      console.error("Couldn't get a reading list.");
-      ctx.reply(
-        "Something went wrong and couldn't get your reading list. Leaving the scene...",
-      );
+      const errMsg = "Couldn't get a reading list: ";
+      const ctxMsg =
+        "Something went wrong and couldn't get your reading list. Leaving the scene...";
+      await checkError(err, ctx, errMsg, ctxMsg);
+
       return ctx.scene.leave();
     }
   },

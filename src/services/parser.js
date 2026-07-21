@@ -1,4 +1,4 @@
-import { createApiClient } from "../config/api.js";
+import { createApiClient, ExpiredCookiesError } from "../config/api.js";
 
 export async function getNotificationsList(chatId) {
   const apiClient = await createApiClient(chatId);
@@ -30,7 +30,12 @@ export async function getNotificationsList(chatId) {
         },
       };
     });
+
+    
   } catch (err) {
+    if (err instanceof ExpiredCookiesError) {
+      throw err;
+    }
     console.error("Couldn't retrieve notifications data: ", err);
     return [];
   }
@@ -55,6 +60,9 @@ export async function getReadingList(chatId) {
       };
     });
   } catch (err) {
+    if (err instanceof ExpiredCookiesError) {
+      throw err;
+    }
     console.error("Couldn't retrieve reading list data: ", err);
     return [];
   }

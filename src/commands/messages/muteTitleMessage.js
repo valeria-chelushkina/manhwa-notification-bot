@@ -1,6 +1,7 @@
 import { Keyboard } from "../../ui/keyboard.js";
 import { getReadingList } from "../../services/parser.js";
 import { Database } from "../../db/db.js";
+import { checkError } from "../../utils/helpers.js";
 
 const database = new Database();
 
@@ -27,15 +28,13 @@ export async function muteTitleMessage(ctx) {
       return formatted;
     });
 
-    const message = `Your reading list:\n${formattedList.join("\n")}
-`;
+    const message = `Your reading list:\n${formattedList.join("\n")}`;
 
     console.log("Bot sent out reading list.");
     return ctx.reply(message, { parse_mode: "HTML" });
   } catch (err) {
-    console.error("Couldn't send out a reading list: ", err);
-    return ctx.reply(
-      "Sorry, something went wrong while sending out a message.",
-    );
+    const errMsg = "Couldn't send out a reading list: ";
+    const ctxMsg = "Sorry, something went wrong while sending out a message.";
+    return await checkError(err, ctx, errMsg, ctxMsg);
   }
 }

@@ -4,9 +4,17 @@ import { Database } from "../db/db.js";
 
 setupEnv("../../.env");
 
-const database = new Database();
+// new Error class for tracking expired cookies
+export class ExpiredCookiesError extends Error {
+  constructor(message = "Session cookies expired. Please log in again.") {
+    // calls the parent Error constructor with the message
+    super(message);
+    this.name = "ExpiredCookiesError";
+  }
+}
 
 async function getCookieHeaderById(chatId) {
+  const database = new Database();
   const userSession = await database.sessionRepo.getUserSessionById(chatId);
 
   if (!userSession || !userSession.cookies) {
@@ -47,5 +55,19 @@ export async function createApiClient(chatId) {
       "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)...",
     },
   });
+
+  // catch 401 and 403 responses
+  apiClient.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response && [401, 403].includes(error.response.status)) {
+        return Promise.reject(
+          new ExpiredCookiesError("Rejected session cookies."),
+        );
+      }
+      return Promise.reject(error);
+    },
+  );
+
   return apiClient;
 }

@@ -1,15 +1,25 @@
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import path from "path";
+import { ExpiredCookiesError } from "../config/api.js";
 
-setupEnv("../../.env")
+setupEnv("../../.env");
 
-function escapeHtml(text) {
+export function escapeHtml(text) {
   if (!text) return "";
   return text
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
+}
+
+export function cleanTitle(text)
+{
+  if(!text) return '';
+  return text
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
 }
 
 export function cleanHtml(data) {
@@ -35,12 +45,18 @@ export function compareTitles(readingList, titleName) {
   return result;
 }
 
-export function setupEnv(filePath){
+export function setupEnv(filePath) {
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   dotenv.config({ path: path.resolve(__dirname, filePath) });
 }
 
-export async function getTgChatId()
-{
-  
+export async function checkError(err, ctx, errMsg, ctxMsg) {
+  if (err instanceof ExpiredCookiesError) {
+    return await ctx.reply(
+      "🍪Cookies expired! Please relogin once again through /login command.",
+      { parse_mode: "HTML" },
+    );
+  }
+  console.error(errMsg + err);
+  return await ctx.reply(ctxMsg, { parse_mode: "HTML" });
 }
