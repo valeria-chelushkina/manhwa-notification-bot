@@ -1,6 +1,4 @@
 import axios from "axios";
-import { fileURLToPath } from "url";
-import { readJsonFile } from "../utils/jsonHelper.js";
 import { setupEnv } from "../utils/helpers.js";
 import { Database } from "../db/db.js";
 

@@ -1,12 +1,6 @@
 import { Keyboard } from "../../ui/keyboard.js";
 import { getReadingList } from "../../services/parser.js";
-import { fileURLToPath } from "url";
-import { readJsonFile } from "../../utils/jsonHelper.js";
 import { Database } from "../../db/db.js";
-
-const mutedPath = fileURLToPath(
-  new URL("../../storage/mutedList.json", import.meta.url),
-);
 
 const database = new Database();
 

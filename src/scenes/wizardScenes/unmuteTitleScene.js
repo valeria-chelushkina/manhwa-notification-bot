@@ -3,8 +3,6 @@
 import { Scenes, Markup, Composer } from "telegraf";
 import { compareTitles } from "../../utils/helpers.js";
 import { mainMenuMessage } from "../../commands/messages/mainMenuMessage.js";
-import { fileURLToPath } from "url";
-import { readJsonFile, writeJsonFile } from "../../utils/jsonHelper.js";
 import { Keyboard } from "../../ui/keyboard.js";
 import { Database } from "../../db/db.js";
 

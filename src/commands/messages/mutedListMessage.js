@@ -1,5 +1,3 @@
-import { fileURLToPath } from "url";
-import { readJsonFile } from "../../utils/jsonHelper.js";
 import { Database } from "../../db/db.js";
 
 const database = new Database().userRepo;

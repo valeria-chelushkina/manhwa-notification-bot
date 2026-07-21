@@ -123,7 +123,6 @@ export async function startServer(bot) {
         return res.sendStatus(401);
       }
 
-      // 2. Send the message via the bot instance
       await bot.telegram.sendMessage(
         userId,
         "You logged in successfully! 🎉 Now you can set up your notifications.",
