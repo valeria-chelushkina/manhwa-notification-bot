@@ -20,7 +20,7 @@ export async function onStartAction(ctx, bot) {
     if (
       userSession &&
       userSession.cookies &&
-      (userSession.is_active === true || userSession.is_active === "true")
+      (userSession.is_active || userSession.is_active === "true")
     ) {
       console.log(
         `User ${chatId} already has active cookies. Redirecting to options screen right away...`,

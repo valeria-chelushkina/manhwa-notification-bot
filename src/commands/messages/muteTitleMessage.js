@@ -1,16 +1,13 @@
 import { Keyboard } from "../../ui/keyboard.js";
 import { getReadingList } from "../../services/parser.js";
-import { Database } from "../../db/db.js";
 import { checkError } from "../../utils/helpers.js";
-
-const database = new Database();
 
 export async function muteTitleMessage(ctx) {
   try {
     await ctx.answerCbQuery();
     const chatId = ctx.chat.id;
-    const readingList = await getReadingList(chatId);
-    const mutedList = await database.userRepo.getMutedListById(chatId);
+    const readingList = await getReadingList(chatId, ctx);
+    const mutedList = await ctx.db.userRepo.getMutedListById(chatId);
 
     if (!Array.isArray(readingList) || readingList.length === 0) {
       return ctx.reply(

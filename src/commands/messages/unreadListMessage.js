@@ -1,14 +1,11 @@
 import { getNotificationsList } from "../../services/parser.js";
 import { cleanHtml } from "../../utils/helpers.js";
-import { Database } from "../../db/db.js";
 import { checkError, cleanTitle } from "../../utils/helpers.js";
-
-const database = new Database().userRepo;
 
 export async function unreadListMessage(ctx) {
   try {
     const chatId = ctx.chat.id;
-    let unreadList = await getNotificationsList(chatId);
+    let unreadList = await getNotificationsList(chatId, ctx);
 
     let notificationContent = "";
 
@@ -16,8 +13,7 @@ export async function unreadListMessage(ctx) {
       notificationContent = `There are no new notifications on your account!
 Go and read anything else :)`;
     } else {
-      unreadList = await notIncludeMute(unreadList, chatId);
-      console.log(unreadList);
+      unreadList = await notIncludeMute(unreadList, chatId, ctx);
       if(!unreadList) unreadList = [];
       const formattedList = unreadList.map((item, i) => {
         const cleanedItem = Object.assign({}, item, cleanHtml(item));
@@ -38,17 +34,14 @@ ${formattedList.join("\n")}`;
   }
 }
 
-async function notIncludeMute(readingList, chatId) {
-  const mutedList = await database.getMutedListById(chatId);
-  console.log("Muted list: ", mutedList);
+async function notIncludeMute(readingList, chatId, ctx) {
+  const mutedList = await ctx.db.userRepo.getMutedListById(chatId);
   const lookupSet = new Set(mutedList);
-  console.log("lookupSet: ", lookupSet);
   readingList.forEach((item, index) => {
     item.title = cleanTitle(item.title);
     if (lookupSet.has(item.title)) {
       readingList.splice(index, 1);
     }
   });
-  console.log("readingList: ", readingList);
   return readingList;
 }

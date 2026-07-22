@@ -4,9 +4,6 @@ import { Scenes, Markup, Composer } from "telegraf";
 import { compareTitles } from "../../utils/helpers.js";
 import { mainMenuMessage } from "../../commands/messages/mainMenuMessage.js";
 import { Keyboard } from "../../ui/keyboard.js";
-import { Database } from "../../db/db.js";
-
-const database = new Database().userRepo;
 
 const startStepHandler = new Composer();
 startStepHandler.action("continue-unmute", async (ctx) => {
@@ -52,7 +49,7 @@ export const unmuteTitleScene = new Scenes.WizardScene(
     try {
       const chatId = ctx.chat.id;
       const titleName = ctx.message.text;
-      let listData = await database.getMutedListById(chatId);
+      let listData = await ctx.db.userRepo.getMutedListById(chatId);
       const compareResult = compareTitles(listData, titleName);
 
       if (!compareResult.isPresent) {
@@ -76,7 +73,7 @@ export const unmuteTitleScene = new Scenes.WizardScene(
 
       // write new array into the muted list
       try {
-        await database.updateMutedList(chatId, listData);
+        await ctx.db.userRepo.updateMutedList(chatId, listData);
 
         await ctx.reply("Unmuted title successfully!");
 

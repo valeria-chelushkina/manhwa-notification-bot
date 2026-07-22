@@ -7,7 +7,6 @@ import { disableTitleMessage } from "./messages/disableTitleMessage.js";
 import { muteTitleMessage } from "./messages/muteTitleMessage.js";
 import { mutedListMessage } from "./messages/mutedListMessage.js";
 import { Keyboard } from "../ui/keyboard.js";
-import { Database } from "../db/db.js";
 import { Markup } from "telegraf";
 import { message } from "telegraf/filters";
 
@@ -38,13 +37,11 @@ export function startupBot(bot, chatId) {
   );
 
   bot.action("start-schedule", async (ctx) => {
-    isActive = true;
-    await setScheduleMessage(ctx, bot);
+    isActive = await setScheduleMessage(ctx, bot, isActive);
   });
 
   bot.action("stop-schedule", async (ctx) => {
-    isActive = false;
-    await stopScheduleMessage(ctx);
+    isActive = await stopScheduleMessage(ctx, isActive);
   });
 
   bot.action(

@@ -1,6 +1,5 @@
 import axios from "axios";
 import { setupEnv } from "../utils/helpers.js";
-import { Database } from "../db/db.js";
 
 setupEnv("../../.env");
 
@@ -13,9 +12,8 @@ export class ExpiredCookiesError extends Error {
   }
 }
 
-async function getCookieHeaderById(chatId) {
-  const database = new Database();
-  const userSession = await database.sessionRepo.getUserSessionById(chatId);
+async function getCookieHeaderById(chatId, ctx) {
+  const userSession = await ctx.db.sessionRepo.getUserSessionById(chatId);
 
   if (!userSession || !userSession.cookies) {
     console.warn(`No cookies for user ${chatId} found!`);
@@ -47,11 +45,11 @@ async function getCookieHeaderById(chatId) {
   }
 }
 
-export async function createApiClient(chatId) {
+export async function createApiClient(chatId, ctx) {
   const apiClient = axios.create({
     baseURL: process.env.BASE_URL,
     headers: {
-      Cookie: await getCookieHeaderById(chatId),
+      Cookie: await getCookieHeaderById(chatId, ctx),
       "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)...",
     },
   });

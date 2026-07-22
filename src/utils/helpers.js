@@ -60,3 +60,13 @@ export async function checkError(err, ctx, errMsg, ctxMsg) {
   console.error(errMsg + err);
   return await ctx.reply(ctxMsg, { parse_mode: "HTML" });
 }
+
+export async function checkActiveCookes(chatId, ctx)
+{
+  const session = await ctx.db.sessionRepo.getUserSessionById(chatId);
+  const is_active = session.is_active;
+  if(!is_active || is_active === 'false') {
+    const err = new ExpiredCookiesError();
+    throw err;
+  }
+}

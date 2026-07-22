@@ -1,85 +1,84 @@
 import { getNotificationsList } from "./parser.js";
 import { sendNewChapter } from "./telegram.js";
-import { Database } from "../db/db.js";
-import { checkError, cleanTitle } from "../utils/helpers.js";
-
-const database = new Database();
+import { checkError, cleanTitle, checkActiveCookes } from "../utils/helpers.js";
 
 let scheduleInterval = null;
 
-async function checkChapters(bot, chatId) {
-  try {
-    let notificationsList = await getNotificationsList(chatId);
+async function checkChapters(bot, chatId, ctx) {
+  let notificationsList = await getNotificationsList(chatId, ctx);
 
-    if (!notificationsList || notificationsList.length === 0) return; // no new chapters were released
+  if (!notificationsList || notificationsList.length === 0) return; // no new chapters were released
 
-    let lastUpdate = notificationsList[0]; // the last released chapter would be first in the array
+  let lastUpdate = notificationsList[0]; // the last released chapter would be first in the array
 
-    const userList = await database.notificationHistoryRepo.getByUserId(chatId);
-    let chapterIds;
-    if (userList) {
-      chapterIds = userList.map((item) => item.chapter_id);
-    } else {
-      chapterIds = [];
-    }
+  const userList = await ctx.db.notificationHistoryRepo.getByUserId(chatId);
+  let chapterIds;
+  if (userList) {
+    chapterIds = userList.map((item) => item.chapter_id);
+  } else {
+    chapterIds = [];
+  }
 
-    const chapterIdsSet = new Set(chapterIds);
+  const chapterIdsSet = new Set(chapterIds);
 
-    // check if lastUpdate had already been seen
-    if (chapterIdsSet.has(lastUpdate)) {
-      console.log("No changes.");
-      return;
-    }
-
-    const mutedList = await database.userRepo.getMutedListById(chatId);
-    const lookupSet = new Set(mutedList);
-
-    // find all items that are newer than checkpoint
-    const newItems = [];
-    for (const item of notificationsList) {
-      item.title = cleanTitle(item.title);
-      if (chapterIdsSet.has(item.id)) break;
-      if (await compareNotificaitons(item, chatId));
-      database.notificationHistoryRepo.addNotificationToDB(
-        item.id,
-        chatId,
-        item.title,
-        item.chapter,
-      );
-      if (lookupSet.has(item.title)) continue;
-      newItems.push(item);
-    }
-
-    // send out chapters
-    newItems.reverse();
-    for (const item of newItems) {
-      await sendNewChapter(bot, chatId, item);
-    }
-
+  // check if lastUpdate had already been seen
+  if (chapterIdsSet.has(lastUpdate)) {
+    console.log("No changes.");
     return;
-  } catch (err) {
-    console.error("Error while checking chapters: ", err);
-    throw err;
+  }
+
+  const mutedList = await ctx.db.userRepo.getMutedListById(chatId);
+  const lookupSet = new Set(mutedList);
+
+  // find all items that are newer than checkpoint
+  const newItems = [];
+  for (const item of notificationsList) {
+    item.title = cleanTitle(item.title);
+    if (chapterIdsSet.has(item.id)) break;
+    if (await compareNotificaitons(item, chatId, ctx));
+    await ctx.db.notificationHistoryRepo.addNotificationToDB(
+      item.id,
+      chatId,
+      item.title,
+      item.chapter,
+    );
+    if (lookupSet.has(item.title)) continue;
+    newItems.push(item);
+  }
+
+  // send out chapters
+  newItems.reverse();
+  for (const item of newItems) {
+    await sendNewChapter(bot, chatId, item);
   }
 }
 
-export function setSchedule(bot, chatId, stop = false) {
+export async function setSchedule(bot, chatId, ctx) {
+  await checkActiveCookes(chatId, ctx);
   if (scheduleInterval) {
     clearInterval(scheduleInterval);
   }
 
   console.log("Starting schedule...");
-  if (!scheduleInterval)
+
+  await checkChapters(bot, chatId, ctx);
+
+  scheduleInterval = setInterval(async () => {
     try {
-      checkChapters(bot, chatId);
+      await checkChapters(bot, chatId, ctx);
     } catch (err) {
-      throw err;
+      console.error(`Error for ${chatId}:`, err.message);
+
+      if (err.name === "ExpiredCookiesError") {
+        stopSchedule();
+      }
     }
+  }, 10 * 60 * 1000);
 
   scheduleInterval = setInterval(
     () => {
       try {
-        checkChapters(bot, chatId);
+        checkChapters(bot, chatId, ctx);
       } catch (err) {
         throw err;
       }
@@ -98,9 +97,9 @@ export function stopSchedule() {
   }
 }
 
-async function compareNotificaitons(item, chatId) {
+async function compareNotificaitons(item, chatId, ctx) {
   const comparedNotification =
-    await database.notificationHistoryRepo.getNotificationById(
+    await ctx.db.notificationHistoryRepo.getNotificationById(
       chatId,
       item.title,
       item.chapter,

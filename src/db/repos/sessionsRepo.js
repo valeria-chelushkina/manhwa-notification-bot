@@ -39,4 +39,16 @@ export class SessionRepo {
       throw err;
     }
   }
+
+  async setCookiesUnactive(chatId)
+  {
+    const query = `UPDATE user_sessions SET is_active = $1 WHERE telegram_id = $2`;
+
+    try {
+      await this.pool.query(query, ["false", chatId]);
+    } catch (err) {
+      console.error("Couldn't set cookies unactive in DB: ", err);
+      throw err;
+    }
+  }
 }

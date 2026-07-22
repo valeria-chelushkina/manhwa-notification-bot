@@ -7,8 +7,8 @@ import axios from "axios";
 import { setupEnv } from "../utils/helpers.js";
 import { Database } from "../db/db.js";
 import { mainMenuMessage } from "../commands/messages/mainMenuMessage.js";
-  import fs from "fs";
-  import { loginMessage } from "../commands/messages/loginMessage.js";
+import fs from "fs";
+import { loginMessage } from "../commands/messages/loginMessage.js";
 
 setupEnv("../../.env");
 

@@ -1,7 +1,9 @@
 import { createApiClient, ExpiredCookiesError } from "../config/api.js";
+import { checkActiveCookes } from "../utils/helpers.js";
 
-export async function getNotificationsList(chatId) {
-  const apiClient = await createApiClient(chatId);
+export async function getNotificationsList(chatId, ctx) {
+  await checkActiveCookes(chatId, ctx);
+  const apiClient = await createApiClient(chatId, ctx);
   try {
     const rawList = await getList(
       "/api/v1/user/notifications?scope=comics&unread=1&page=",
@@ -14,9 +16,7 @@ export async function getNotificationsList(chatId) {
       const cleanTitle = item.contentHtml.replace(/<\/?[^>]+(>|$)/g, "");
 
       // get the chapter number
-      const chapterNumber = parseInt(
-        item.subtext.replace(/[^\d.]/g, "").slice(1),
-      );
+      const chapterNumber = item.subtext.slice(3);
       return {
         id: item.id.toString(),
         releasedAt: item.createdAtFormatted,
@@ -34,6 +34,7 @@ export async function getNotificationsList(chatId) {
     
   } catch (err) {
     if (err instanceof ExpiredCookiesError) {
+      await ctx.db.sessionRepo.setCookiesUnactive(chatId);
       throw err;
     }
     console.error("Couldn't retrieve notifications data: ", err);
@@ -41,8 +42,9 @@ export async function getNotificationsList(chatId) {
   }
 }
 
-export async function getReadingList(chatId) {
-  const apiClient = await createApiClient(chatId);
+export async function getReadingList(chatId, ctx) {
+  await checkActiveCookes(chatId, ctx);
+  const apiClient = await createApiClient(chatId, ctx);
   try {
     const rawList = await getList(
       "/api/v1/user/following-titles?folder_id=1&sort=chapter_updated_desc&page=",
@@ -61,6 +63,7 @@ export async function getReadingList(chatId) {
     });
   } catch (err) {
     if (err instanceof ExpiredCookiesError) {
+      await ctx.db.sessionRepo.setCookiesUnactive(chatId);
       throw err;
     }
     console.error("Couldn't retrieve reading list data: ", err);

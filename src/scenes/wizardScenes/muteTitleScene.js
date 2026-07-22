@@ -5,10 +5,7 @@ import { compareTitles } from "../../utils/helpers.js";
 import { getReadingList } from "../../services/parser.js";
 import { mainMenuMessage } from "../../commands/messages/mainMenuMessage.js";
 import { Keyboard } from "../../ui/keyboard.js";
-import { Database } from "../../db/db.js";
 import { checkError } from "../../utils/helpers.js";
-
-const database = new Database();
 
 export const inlineHandler = new Composer();
 inlineHandler.action("continue", async (ctx) => {
@@ -35,7 +32,7 @@ export const muteTitleScene = new Scenes.WizardScene(
   async (ctx) => {
     try {
       const chatId = ctx.chat.id;
-      const readingList = await getReadingList(chatId);
+      const readingList = await getReadingList(chatId, ctx);
       const titleName = ctx.message.text;
 
       // right now it doesnt resolve a problem if there are two same title names. it will just silence all of them.
@@ -53,7 +50,7 @@ export const muteTitleScene = new Scenes.WizardScene(
       }
 
       // checks if title is already muted
-      let listData = await database.userRepo.getMutedListById(chatId);
+      let listData = await ctx.db.userRepo.getMutedListById(chatId);
 
       if (compareTitles(listData, titleName).isPresent) {
         await ctx.reply(
@@ -66,7 +63,7 @@ export const muteTitleScene = new Scenes.WizardScene(
       }
 
       try {
-        await database.userRepo.addToMutedList(chatId, compareResult.titleName);
+        await ctx.db.userRepo.addToMutedList(chatId, compareResult.titleName);
 
         await ctx.reply("Added your title to a muted list successfully!");
 

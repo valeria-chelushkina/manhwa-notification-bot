@@ -1,12 +1,8 @@
-import { Database } from "../../db/db.js";
-
-const database = new Database().userRepo;
-
 export async function mutedListMessage(ctx) {
   try {
     await ctx.answerCbQuery();
     const chatId = ctx.chat.id;
-    const mutedList = await database.getMutedListById(chatId);
+    const mutedList = await ctx.db.userRepo.getMutedListById(chatId);
 
     if (!Array.isArray(mutedList) || mutedList.length === 0) {
       return ctx.reply("Your muted list is empty. No titles muted.");
